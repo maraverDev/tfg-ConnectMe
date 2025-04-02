@@ -1,0 +1,38 @@
+# Laravel
+/backend/vendor/
+/backend/.env
+/backend/storage/*
+!/backend/storage/app
+!/backend/storage/framework
+!/backend/storage/logs
+
+# Laravel logs y caché
+/backend/storage/logs/*
+/backend/storage/framework/cache/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/views/*
+/backend/bootstrap/cache/*
+
+# Laravel IDE Helper
+/_ide_helper.php
+/_ide_helper_models.php
+
+# React + Vite
+/frontend/node_modules/
+/frontend/.vite/
+/frontend/.env
+/frontend/dist/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Composer / npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+composer.lock
