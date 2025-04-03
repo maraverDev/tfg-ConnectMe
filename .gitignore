@@ -6,6 +6,9 @@
 !/backend/storage/framework
 !/backend/storage/logs
 
+/backend_old
+/frontend_old
+
 # Laravel logs y caché
 /backend/storage/logs/*
 /backend/storage/framework/cache/*

@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+/* Personalización de SweetAlert2 */
+.swal2-popup {
+  background-color: #f5f5f5 !important; /* Fondo gris claro */
+  border-radius: 10px;
+  padding: 20px;
+  color: #333;
+}
+
+.swal2-title {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.swal2-icon {
+  color: #ff4040; /* Rojo para iconos de error */
+}
+
+.swal2-confirm {
+  background-color: #4338CA;
+  color: white;
+  border-radius: 5px;
+}
