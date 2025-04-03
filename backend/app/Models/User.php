@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model
+class User extends Authenticatable
 {
+    use Notifiable;
+
     protected $table = 'users';
 
     protected $fillable = [
@@ -20,12 +23,8 @@ class User extends Model
     protected $hidden = [
         'password',
     ];
-    const UPDATED_AT = null; // 👈 esto evita que Laravel lo busque o devuelva
+
+    const UPDATED_AT = null;
 
     public $timestamps = true;
-
-    public function posts()
-    {
-        return $this->hasMany(Post::class);
-    }
 }

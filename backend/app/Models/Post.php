@@ -3,19 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
 
 class Post extends Model
 {
     protected $table = 'posts';
+    public $timestamps = false; // Solo usamos created_at, no updated_at
 
     protected $fillable = [
         'user_id',
         'image_url',
         'caption',
+        'created_at',
     ];
-    const UPDATED_AT = null; // 👈 esto evita que Laravel lo busque o devuelva
-
-    public $timestamps = true;
 
     public function user()
     {
