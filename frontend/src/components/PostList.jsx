@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 function PostList({ refresh }) {
   const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api
@@ -37,9 +39,15 @@ function PostList({ refresh }) {
                 <p className="text-gray-700 text-sm mb-2">
                   {post.caption || "Sin descripción."}
                 </p>
-                <div className="flex items-center gap-3 mt-4">
+                <div
+                  className="flex items-center gap-3 mt-4 cursor-pointer"
+                  onClick={() => navigate(`/profile/${post.user.id}`)}
+                >
                   <img
-                    src={post.user.avatar_url || "https://www.gravatar.com/avatar/?d=mp"}
+                    src={
+                      post.user.avatar_url ||
+                      "https://www.gravatar.com/avatar/?d=mp"
+                    }
                     alt={post.user.name}
                     className="w-10 h-10 rounded-full border"
                   />

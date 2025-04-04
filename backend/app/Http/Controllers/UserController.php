@@ -75,10 +75,6 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        if (Auth::id() !== $user->id) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
         return response()->json($user);
     }
 

@@ -3,21 +3,23 @@ import { useParams } from 'react-router-dom';
 import api from '../api';
 
 function DynamicProfile() {
-  const { id } = useParams();
+  const { id } = useParams(); // Este es el ID dinámico desde la URL
   const [userData, setUserData] = useState(null);
   const [userPosts, setUserPosts] = useState([]);
 
   useEffect(() => {
+    // Cargar datos del perfil usando el ID de la URL
     api.get(`/users/${id}`)
       .then(res => setUserData(res.data))
       .catch(err => console.error('Error cargando perfil:', err));
 
+    // Cargar posts del usuario basado en ID
     api.get('/posts')
       .then(res => {
         const ownPosts = res.data.filter(post => post.user.id == id);
         setUserPosts(ownPosts);
       })
-      .catch(err => console.error('Error cargando posts:', err));
+      .catch(err => console.error('Error cargando posts del usuario:', err));
   }, [id]);
 
   if (!userData) return <p className="text-center mt-8 text-gray-500">Cargando perfil...</p>;
