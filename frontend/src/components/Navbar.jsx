@@ -40,7 +40,7 @@ function Navbar({ user, onLogout, onShowCreatePost }) {
                 <button
                   className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                   onClick={() => {
-                    navigate("/profile");
+                    navigate(`/profile/${user.id}`);
                     setOpen(false);
                   }}
                 >

@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api";
 import Swal from "sweetalert2";
 import ImageCropper from "./ImageCropper";
+import { Image as ImageIcon, RotateCcw } from "lucide-react";
 
 function CreatePost({ onPostCreated, user }) {
   const [rawImage, setRawImage] = useState(null); // archivo base64
@@ -64,9 +65,15 @@ function CreatePost({ onPostCreated, user }) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {!rawImage ? (
-          <div className="flex flex-col items-center">
-            <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
-              Seleccionar imagen
+          <div className="flex justify-center items-center w-full h-56 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:border-indigo-500 transition">
+            <label className="flex flex-col justify-center items-center w-full h-full cursor-pointer px-4">
+              {/* Icono Lucide 🌄 */}
+              <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
+
+              <p className="text-sm text-gray-500 text-center">
+                Haz clic para seleccionar una imagen
+              </p>
+
               <input
                 type="file"
                 accept="image/*"
@@ -81,16 +88,19 @@ function CreatePost({ onPostCreated, user }) {
               image={rawImage}
               onCropComplete={handleCropComplete}
             />
-            <button
-              type="button"
-              onClick={() => {
-                setRawImage(null);
-                setCroppedBlob(null);
-              }}
-              className="text-sm text-indigo-600 hover:underline transition-all"
-            >
-              Cambiar imagen
-            </button>
+            <div className="text-right mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRawImage(null);
+                  setCroppedBlob(null);
+                }}
+                className="inline-flex items-center gap-1 text-sm text-indigo-600 hover:underline transition-all"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Cambiar imagen
+              </button>
+            </div>
           </>
         )}
 

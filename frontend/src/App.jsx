@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import DynamicProfile from "./components/DynamicProfile"; // ← Importa este nuevo
+
+
 import Navbar from "./components/Navbar";
 import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
 import Profile from "./components/Profile";
 import api from "./api";
+
 
 function App() {
   const [user, setUser] = useState(null);
@@ -114,6 +119,8 @@ function App() {
                 )
               }
             />
+
+            <Route path="/profile/:id" element={<DynamicProfile />} />
           </Routes>
         </div>
       </div>
