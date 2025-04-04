@@ -16,9 +16,9 @@ class UserController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users',
-                'password' => 'required|string|min:6|confirmed', // Usamos "confirmed" para validar la coincidencia
-                'bio' => 'nullable|string',
-                'city' => 'nullable|string',
+                'password' => 'required|string|min:6|confirmed', // Usamos "confirmed" para la validación de contraseñas
+                'bio' => 'required|nullable|string',
+                'city' => 'required|nullable|string',
                 'avatar_url' => 'nullable|url'
             ]);
 
@@ -48,7 +48,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
 
 
 

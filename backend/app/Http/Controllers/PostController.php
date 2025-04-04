@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Post;
-use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -19,17 +20,23 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image_url' => 'required|url',
+            'image' => 'required|image|max:2048', // archivo de imagen
             'caption' => 'nullable|string',
         ]);
 
+        // Guardar imagen en storage/app/public/posts
+        $path = $request->file('image')->store('posts', 'public');
+
         $post = Post::create([
-            'user_id' => Auth::id(),
-            'image_url' => $request->image_url,
+            'user_id' => Auth::id(), // autenticación basada en sesión
+            'image_url' => asset('storage/' . $path),
             'caption' => $request->caption,
         ]);
 
-        return response()->json(['message' => 'Post creado correctamente', 'post' => $post], 201);
+        return response()->json([
+            'message' => 'Post creado correctamente',
+            'post' => $post,
+        ], 201);
     }
 
     // Mostrar un solo post

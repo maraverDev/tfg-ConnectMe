@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { EyeIcon,EyeSlashIcon } from '@heroicons/react/24/solid';  // Usamos la ruta correcta
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';  // Correcta importación de los iconos de Heroicons
 import api from '../api';
 import Swal from 'sweetalert2';
 
@@ -8,11 +8,11 @@ function Register({ onRegister }) {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
+    password_confirmation: '',
     bio: '',
     city: '',
-    avatar_url: '',
-    termsAccepted: false // Checkbox para aceptar términos y condiciones
+    avatar_url: '',  // Avatar URL opcional
+    termsAccepted: false, // Checkbox para aceptar términos y condiciones
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -30,21 +30,21 @@ function Register({ onRegister }) {
     e.preventDefault();
 
     // Validación básica del frontend
-    if (!form.name || !form.email || !form.password || !form.confirmPassword) {
+    if (!form.name || !form.email || !form.password || !form.password_confirmation) {
       Swal.fire({
         icon: 'error',
         title: '¡Error!',
-        text: 'Todos los campos son obligatorios.'
+        text: 'Todos los campos son obligatorios.',
       });
       return;
     }
 
     // Validación de las contraseñas coincidan
-    if (form.password !== form.confirmPassword) {
+    if (form.password !== form.password_confirmation) {
       Swal.fire({
         icon: 'error',
         title: '¡Error!',
-        text: 'Las contraseñas no coinciden.'
+        text: 'Las contraseñas no coinciden.',
       });
       return;
     }
@@ -54,9 +54,14 @@ function Register({ onRegister }) {
       Swal.fire({
         icon: 'error',
         title: '¡Error!',
-        text: 'Debes aceptar los términos y condiciones.'
+        text: 'Debes aceptar los términos y condiciones.',
       });
       return;
+    }
+
+    // Si no se proporciona una URL para el avatar, usar una imagen predeterminada
+    if (!form.avatar_url) {
+      form.avatar_url = 'https://www.example.com/default-avatar.png'; // URL de la imagen predeterminada
     }
 
     try {
@@ -71,7 +76,7 @@ function Register({ onRegister }) {
         title: '¡Registro exitoso!',
         text: 'Ahora puedes iniciar sesión con tus credenciales.',
         background: '#f5f5f5',
-        confirmButtonColor: '#4CAF50'
+        confirmButtonColor: '#4CAF50',
       });
     } catch (err) {
       if (err.response && err.response.data.errors) {
@@ -80,14 +85,14 @@ function Register({ onRegister }) {
           Swal.fire({
             icon: 'error',
             title: '¡Error!',
-            text: errors[field].join(' ')  // Mostrar errores del backend
+            text: errors[field].join(' '), // Mostrar errores del backend
           });
         }
       } else {
         Swal.fire({
           icon: 'error',
           title: '¡Error!',
-          text: 'Hubo un problema al registrarse. Inténtalo de nuevo más tarde.'
+          text: 'Hubo un problema al registrarse. Inténtalo de nuevo más tarde.',
         });
       }
     }
@@ -127,7 +132,7 @@ function Register({ onRegister }) {
         />
         <button
           type="button"
-          className="absolute right-3 top-2 text-gray-500"
+          className="absolute right-3 top-2.5 text-gray-500"
           onClick={() => setPasswordVisible(!passwordVisible)}
         >
           {passwordVisible ? (
@@ -142,16 +147,16 @@ function Register({ onRegister }) {
       <div className="relative">
         <input
           type={confirmPasswordVisible ? 'text' : 'password'}
-          name="confirmPassword"
+          name="password_confirmation"
           placeholder="Confirmar contraseña"
           className="w-full p-2 border rounded"
-          value={form.confirmPassword}
+          value={form.password_confirmation}
           onChange={handleChange}
           required
         />
         <button
           type="button"
-          className="absolute right-3 top-2 text-gray-500"
+          className="absolute right-3 top-2.5 text-gray-500"
           onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
         >
           {confirmPasswordVisible ? (
@@ -165,11 +170,10 @@ function Register({ onRegister }) {
       <input
         type="text"
         name="avatar_url"
-        placeholder="URL del avatar"
+        placeholder="URL del avatar (opcional)"
         className="w-full p-2 border rounded"
         value={form.avatar_url}
         onChange={handleChange}
-        required
       />
       <input
         type="text"
