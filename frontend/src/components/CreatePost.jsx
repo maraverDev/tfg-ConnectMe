@@ -1,36 +1,41 @@
 import { useState } from "react";
 import api from "../api";
 import Swal from "sweetalert2";
+import ImageCropper from "./ImageCropper";
 
 function CreatePost({ onPostCreated, user }) {
-  const [imageFile, setImageFile] = useState(null);
+  const [rawImage, setRawImage] = useState(null); // archivo base64
+  const [croppedBlob, setCroppedBlob] = useState(null); // blob recortado
   const [caption, setCaption] = useState("");
-  const [previewUrl, setPreviewUrl] = useState(null);
 
-  const handleFileChange = (e) => {
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImageFile(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onloadend = () => setRawImage(reader.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (cropped) => {
+    setCroppedBlob(cropped);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!imageFile) {
+    if (!croppedBlob) {
       return Swal.fire({
         icon: "warning",
-        title: "Falta imagen",
-        text: "Selecciona una imagen antes de publicar.",
+        title: "Selecciona y recorta una imagen.",
       });
     }
 
     const formData = new FormData();
-    formData.append("image", imageFile);
+    formData.append("image", croppedBlob, "cropped.jpg");
     formData.append("caption", caption);
     formData.append("user_id", user.id);
 
     try {
-      const res = await api.post("/posts", formData, {
+      await api.post("/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -41,16 +46,12 @@ function CreatePost({ onPostCreated, user }) {
         showConfirmButton: false,
       });
 
-      onPostCreated(res.data);
-      setImageFile(null);
-      setCaption("");
-      setPreviewUrl(null);
-    } catch (err) {
-      console.error(err);
+      onPostCreated(true);
+    } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "No se pudo crear la publicación.",
+        title: "Error al subir imagen",
+        text: "Inténtalo de nuevo.",
       });
     }
   };
@@ -62,32 +63,37 @@ function CreatePost({ onPostCreated, user }) {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Selector de imagen con preview */}
-        <div className="flex flex-col items-center justify-center">
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="preview"
-              className="rounded-lg w-full h-64 object-cover mb-2"
+        {!rawImage ? (
+          <div className="flex flex-col items-center">
+            <label className="cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
+              Seleccionar imagen
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageChange}
+              />
+            </label>
+          </div>
+        ) : (
+          <>
+            <ImageCropper
+              image={rawImage}
+              onCropComplete={handleCropComplete}
             />
-          ) : (
-            <div className="w-full h-64 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-              Vista previa de la imagen
-            </div>
-          )}
-          <label className="mt-2 cursor-pointer bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded">
-            Seleccionar imagen
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-              required
-            />
-          </label>
-        </div>
+            <button
+              type="button"
+              onClick={() => {
+                setRawImage(null);
+                setCroppedBlob(null);
+              }}
+              className="text-sm text-indigo-600 hover:underline transition-all"
+            >
+              Cambiar imagen
+            </button>
+          </>
+        )}
 
-        {/* Descripción */}
         <textarea
           value={caption}
           onChange={(e) => setCaption(e.target.value)}
@@ -95,7 +101,6 @@ function CreatePost({ onPostCreated, user }) {
           className="w-full p-2 border rounded resize-none h-24"
         />
 
-        {/* Botones */}
         <div className="flex justify-end gap-3">
           <button
             type="submit"
@@ -105,7 +110,7 @@ function CreatePost({ onPostCreated, user }) {
           </button>
           <button
             type="button"
-            onClick={() => onPostCreated(null)} // Cancela y cierra
+            onClick={() => onPostCreated(null)}
             className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded"
           >
             Cancelar
