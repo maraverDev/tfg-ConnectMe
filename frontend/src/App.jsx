@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+
+import EditProfile from "./components/EditProfile";
 import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
@@ -121,6 +123,18 @@ function App() {
             element={
               user ? (
                 <Profile user={user} />
+              ) : (
+                <div className="text-center mt-10">Acceso no autorizado</div>
+              )
+            }
+          />
+
+          {/* Editar Perfil propio */}
+          <Route
+            path="/edit/profile"
+            element={
+              user ? (
+                <EditProfile user={user} />
               ) : (
                 <div className="text-center mt-10">Acceso no autorizado</div>
               )

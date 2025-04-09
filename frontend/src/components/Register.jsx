@@ -2,6 +2,8 @@ import { useState } from "react";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
 import api from "../api";
 import Swal from "sweetalert2";
+import ImageCropper from "./ImageCropper";  // Importamos ImageCropper
+import { Image as ImageIcon, RotateCcw } from "lucide-react";
 
 function Register({ onRegister }) {
   const [form, setForm] = useState({
@@ -11,12 +13,14 @@ function Register({ onRegister }) {
     password_confirmation: "",
     bio: "",
     city: "",
-    avatar_url: "",
+    avatar_url: null, // Guardamos el archivo de la imagen
     termsAccepted: false,
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [rawImage, setRawImage] = useState(null); // La imagen sin recortar
+  const [croppedBlob, setCroppedBlob] = useState(null); // La imagen recortada
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,51 +30,53 @@ function Register({ onRegister }) {
     setForm({ ...form, termsAccepted: e.target.checked });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => setRawImage(reader.result); // Guardamos la imagen sin recortar
+    reader.readAsDataURL(file);
+  };
+
+  const handleCropComplete = (cropped) => {
+    setCroppedBlob(cropped); // Guardamos la imagen recortada
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !form.name ||
-      !form.email ||
-      !form.password ||
-      !form.password_confirmation
-    ) {
+    if (!croppedBlob) {
       return Swal.fire({
-        icon: "error",
-        title: "¡Error!",
-        text: "Todos los campos son obligatorios.",
+        icon: "warning",
+        title: "Selecciona y recorta una imagen.",
       });
     }
 
-    if (form.password !== form.password_confirmation) {
-      return Swal.fire({
-        icon: "error",
-        title: "¡Error!",
-        text: "Las contraseñas no coinciden.",
-      });
-    }
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("email", form.email);
+    formData.append("password", form.password);
+    formData.append("password_confirmation", form.password_confirmation);
+    formData.append("bio", form.bio);
+    formData.append("city", form.city);
+    formData.append("termsAccepted", form.termsAccepted);
 
-    if (!form.termsAccepted) {
-      return Swal.fire({
-        icon: "error",
-        title: "¡Error!",
-        text: "Debes aceptar los términos y condiciones.",
-      });
-    }
-
-    if (!form.avatar_url) {
-      form.avatar_url = "https://www.example.com/default-avatar.png";
+    // Si la imagen ha sido recortada, la agregamos al FormData
+    if (croppedBlob) {
+      formData.append("avatar_url", croppedBlob, "avatar.jpg");
     }
 
     try {
       // Paso 1: Obtener cookie CSRF
-      // 👇 PRIMERO obtén el token CSRF
       await api.get("/sanctum/csrf-cookie");
 
-      // 👇 AHORA envía el formulario como JSON normal
-      const response = await api.post("/api/register", form);
+      // Paso 2: Enviar los datos con FormData
+      const response = await api.post("/api/register", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data", // Necesario para enviar archivos
+        },
+      });
 
-      // 👇 Consulta el usuario autenticado
+      // Paso 3: Consultar al usuario autenticado
       const userResponse = await api.get("/api/user");
       onRegister(userResponse.data);
 
@@ -170,14 +176,32 @@ function Register({ onRegister }) {
         </button>
       </div>
 
-      <input
-        type="text"
-        name="avatar_url"
-        placeholder="URL del avatar (opcional)"
-        className="w-full p-2 border rounded"
-        value={form.avatar_url}
-        onChange={handleChange}
-      />
+      {/* Avatar */}
+      <div className="flex justify-center items-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:border-indigo-500 transition relative">
+        <label className="flex flex-col justify-center items-center w-full h-64 cursor-pointer px-4">
+          <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
+          <p className="text-sm text-gray-500 text-center">
+            Haz clic para seleccionar una imagen
+          </p>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageChange}
+          />
+        </label>
+
+        {/* Previsualización y recorte de imagen */}
+        {rawImage && (
+          <div className="absolute top-0 left-0 right-0 bottom-0 w-full h-64">
+            <ImageCropper
+              image={rawImage}
+              onCropComplete={handleCropComplete}
+            />
+          </div>
+        )}
+      </div>
+
       <input
         type="text"
         name="city"

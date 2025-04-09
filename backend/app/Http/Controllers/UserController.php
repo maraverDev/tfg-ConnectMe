@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -17,9 +18,9 @@ class UserController extends Controller
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users',
                 'password' => 'required|string|min:6|confirmed', // Usamos "confirmed" para la validación de contraseñas
-                'bio' => 'required|nullable|string',
-                'city' => 'required|nullable|string',
-                'avatar_url' => 'nullable|url'
+                'bio' => 'nullable|string',
+                'city' => 'nullable|string',
+                'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048' // Validación para imagen
             ]);
 
             // Crear el nuevo usuario
@@ -29,7 +30,14 @@ class UserController extends Controller
             $user->password = bcrypt($validated['password']); // Encriptamos la contraseña
             $user->bio = $validated['bio'] ?? null;
             $user->city = $validated['city'] ?? null;
-            $user->avatar_url = $validated['avatar_url'] ?? null;
+
+            // Subir la imagen de perfil
+            if ($request->hasFile('avatar_url')) {
+                // Guardamos la imagen en la carpeta 'avatars' en 'public'
+                $path = $request->file('avatar_url')->store('avatars', 'public');
+                $user->avatar_url = asset('storage/' . $path); // Guardamos la URL pública de la imagen
+            }
+
             $user->save();
 
             // Iniciar sesión automáticamente después del registro
@@ -48,9 +56,6 @@ class UserController extends Controller
             ], 500);
         }
     }
-
-
-
 
     public function login(Request $request)
     {
@@ -102,25 +107,29 @@ class UserController extends Controller
         $data = $request->validate([
             'name' => 'sometimes|string|max:100',
             'bio' => 'nullable|string',
-            'avatar_url' => 'nullable|url',
+            'avatar_url' => 'nullable|image',
             'city' => 'nullable|string|max:255',
-            // Puedes permitir cambiar el email si quieres
-            // 'email' => 'sometimes|email|unique:users,email,' . $id,
-            // Y también la contraseña (no te olvides del hash)
         ]);
+
+        // Si hay una nueva imagen
+        if ($request->hasFile('avatar_url')) {
+            $imagePath = $request->file('avatar_url')->store('avatars', 'public');
+            $data['avatar_url'] = asset('storage/' . $imagePath);
+        }
 
         $user->update($data);
 
-        return response()->json(['message' => 'Usuario actualizado', 'user' => $user]);
+        return response()->json(['message' => 'Perfil actualizado', 'user' => $user]);
     }
+
+
     public function logout(Request $request)
-{
-    Auth::guard('web')->logout(); // importante para Sanctum
+    {
+        Auth::guard('web')->logout(); // importante para Sanctum
 
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return response()->json(['message' => 'Sesión cerrada']);
-}
-
+        return response()->json(['message' => 'Sesión cerrada']);
+    }
 }

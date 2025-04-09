@@ -47,7 +47,7 @@ function DynamicProfile() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {userPosts.map((post) => (
             <div key={post.id} className="rounded overflow-hidden shadow border">
-              <img src={post.image_url} alt="Post" className="w-full h-48 object-cover" />
+              <img src={post.image_url} alt="Post" className="w-full h-48" />
               <div className="p-3">
                 <p className="text-sm text-gray-700">{post.caption}</p>
               </div>

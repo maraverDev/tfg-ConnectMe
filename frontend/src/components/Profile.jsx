@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import api from '../api';
+import { useEffect, useState } from "react";
+import api from "../api";
 
 function Profile({ user }) {
   const [userData, setUserData] = useState(null);
@@ -8,34 +8,43 @@ function Profile({ user }) {
   useEffect(() => {
     if (user?.id) {
       // Perfil
-      api.get(`/api/users/${user.id}`)
-        .then(res => setUserData(res.data))
-        .catch(err => console.error('Error cargando perfil:', err));
+      api
+        .get(`/api/users/${user.id}`)
+        .then((res) => setUserData(res.data))
+        .catch((err) => console.error("Error cargando perfil:", err));
 
       // Posts propios
-      api.get('/api/posts')
-        .then(res => {
-          const ownPosts = res.data.filter(post => post.user.id === user.id);
+      api
+        .get("/api/posts")
+        .then((res) => {
+          const ownPosts = res.data.filter((post) => post.user.id === user.id);
           setUserPosts(ownPosts);
         })
-        .catch(err => console.error('Error cargando posts del usuario:', err));
+        .catch((err) =>
+          console.error("Error cargando posts del usuario:", err)
+        );
     }
   }, [user]);
 
-  if (!userData) return <p className="text-center mt-8 text-gray-500">Cargando perfil...</p>;
+  if (!userData)
+    return <p className="text-center mt-8 text-gray-500">Cargando perfil...</p>;
 
   return (
     <div className="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6 mt-8">
       <div className="flex items-center gap-4">
         <img
-          src={userData.avatar_url || 'https://www.gravatar.com/avatar/?d=mp'}
+          src={userData.avatar_url || "https://www.gravatar.com/avatar/?d=mp"}
           alt="Avatar"
-          className="w-24 h-24 rounded-full border"
+          className="w-24 h-24 rounded-full border object-cover" // Aseguramos que la imagen no se distorsione
         />
         <div>
           <h2 className="text-2xl font-bold text-gray-800">{userData.name}</h2>
-          <p className="text-gray-600">{userData.city || 'Ciudad no especificada'}</p>
-          <p className="text-sm text-gray-500 mt-2">{userData.bio || 'Sin biografía.'}</p>
+          <p className="text-gray-600">
+            {userData.city || "Ciudad no especificada"}
+          </p>
+          <p className="text-sm text-gray-500 mt-2">
+            {userData.bio || "Sin biografía."}
+          </p>
           {userData.links && (
             <a
               href={userData.links}
@@ -51,13 +60,22 @@ function Profile({ user }) {
 
       <hr className="my-6" />
 
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">Mis publicaciones</h3>
+      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+        Mis publicaciones
+      </h3>
 
       {userPosts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {userPosts.map((post) => (
-            <div key={post.id} className="rounded overflow-hidden shadow border">
-              <img src={post.image_url} alt="Post" className="w-full h-48 object-cover" />
+            <div
+              key={post.id}
+              className="rounded overflow-hidden shadow border"
+            >
+              <img
+                src={post.image_url}
+                alt="Post"
+                className="w-full h-48 object-cover"
+              />
               <div className="p-3">
                 <p className="text-sm text-gray-700">{post.caption}</p>
               </div>
