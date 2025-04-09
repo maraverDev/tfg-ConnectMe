@@ -1,98 +1,101 @@
-import { useState } from 'react';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';  // Correcta importación de los iconos de Heroicons
-import api from '../api';
-import Swal from 'sweetalert2';
+import { useState } from "react";
+import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/solid";
+import api from "../api";
+import Swal from "sweetalert2";
 
 function Register({ onRegister }) {
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    bio: '',
-    city: '',
-    avatar_url: '',  // Avatar URL opcional
-    termsAccepted: false, // Checkbox para aceptar términos y condiciones
+    name: "",
+    email: "",
+    password: "",
+    password_confirmation: "",
+    bio: "",
+    city: "",
+    avatar_url: "",
+    termsAccepted: false,
   });
 
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleCheckboxChange = e => {
+  const handleCheckboxChange = (e) => {
     setForm({ ...form, termsAccepted: e.target.checked });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validación básica del frontend
-    if (!form.name || !form.email || !form.password || !form.password_confirmation) {
-      Swal.fire({
-        icon: 'error',
-        title: '¡Error!',
-        text: 'Todos los campos son obligatorios.',
+    if (
+      !form.name ||
+      !form.email ||
+      !form.password ||
+      !form.password_confirmation
+    ) {
+      return Swal.fire({
+        icon: "error",
+        title: "¡Error!",
+        text: "Todos los campos son obligatorios.",
       });
-      return;
     }
 
-    // Validación de las contraseñas coincidan
     if (form.password !== form.password_confirmation) {
-      Swal.fire({
-        icon: 'error',
-        title: '¡Error!',
-        text: 'Las contraseñas no coinciden.',
+      return Swal.fire({
+        icon: "error",
+        title: "¡Error!",
+        text: "Las contraseñas no coinciden.",
       });
-      return;
     }
 
-    // Validación de aceptación de términos
     if (!form.termsAccepted) {
-      Swal.fire({
-        icon: 'error',
-        title: '¡Error!',
-        text: 'Debes aceptar los términos y condiciones.',
+      return Swal.fire({
+        icon: "error",
+        title: "¡Error!",
+        text: "Debes aceptar los términos y condiciones.",
       });
-      return;
     }
 
-    // Si no se proporciona una URL para el avatar, usar una imagen predeterminada
     if (!form.avatar_url) {
-      form.avatar_url = 'https://www.example.com/default-avatar.png'; // URL de la imagen predeterminada
+      form.avatar_url = "https://www.example.com/default-avatar.png";
     }
 
     try {
-      const response = await api.post('/register', form);
-      const userId = response.data.user.id;
-      const userResponse = await api.get(`/users/${userId}`);
+      // Paso 1: Obtener cookie CSRF
+      // 👇 PRIMERO obtén el token CSRF
+      await api.get("/sanctum/csrf-cookie");
+
+      // 👇 AHORA envía el formulario como JSON normal
+      const response = await api.post("/api/register", form);
+
+      // 👇 Consulta el usuario autenticado
+      const userResponse = await api.get("/api/user");
       onRegister(userResponse.data);
 
-      // Mostrar mensaje de éxito con SweetAlert
       Swal.fire({
-        icon: 'success',
-        title: '¡Registro exitoso!',
-        text: 'Ahora puedes iniciar sesión con tus credenciales.',
-        background: '#f5f5f5',
-        confirmButtonColor: '#4CAF50',
+        icon: "success",
+        title: "¡Registro exitoso!",
+        text: "Bienvenido a la plataforma.",
+        background: "#f5f5f5",
+        confirmButtonColor: "#4CAF50",
       });
     } catch (err) {
       if (err.response && err.response.data.errors) {
         const errors = err.response.data.errors;
         for (let field in errors) {
           Swal.fire({
-            icon: 'error',
-            title: '¡Error!',
-            text: errors[field].join(' '), // Mostrar errores del backend
+            icon: "error",
+            title: "¡Error!",
+            text: errors[field].join(" "),
           });
         }
       } else {
         Swal.fire({
-          icon: 'error',
-          title: '¡Error!',
-          text: 'Hubo un problema al registrarse. Inténtalo de nuevo más tarde.',
+          icon: "error",
+          title: "¡Error!",
+          text: "Hubo un problema al registrarse. Inténtalo de nuevo más tarde.",
         });
       }
     }
@@ -122,7 +125,7 @@ function Register({ onRegister }) {
       {/* Contraseña */}
       <div className="relative">
         <input
-          type={passwordVisible ? 'text' : 'password'}
+          type={passwordVisible ? "text" : "password"}
           name="password"
           placeholder="Contraseña"
           className="w-full p-2 border rounded"
@@ -136,9 +139,9 @@ function Register({ onRegister }) {
           onClick={() => setPasswordVisible(!passwordVisible)}
         >
           {passwordVisible ? (
-            <EyeSlashIcon className="w-5 h-5 text-gray-500" />
+            <EyeSlashIcon className="w-5 h-5" />
           ) : (
-            <EyeIcon className="w-5 h-5 text-gray-500" />
+            <EyeIcon className="w-5 h-5" />
           )}
         </button>
       </div>
@@ -146,7 +149,7 @@ function Register({ onRegister }) {
       {/* Confirmar Contraseña */}
       <div className="relative">
         <input
-          type={confirmPasswordVisible ? 'text' : 'password'}
+          type={confirmPasswordVisible ? "text" : "password"}
           name="password_confirmation"
           placeholder="Confirmar contraseña"
           className="w-full p-2 border rounded"
@@ -160,9 +163,9 @@ function Register({ onRegister }) {
           onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
         >
           {confirmPasswordVisible ? (
-            <EyeSlashIcon className="w-5 h-5 text-gray-500" />
+            <EyeSlashIcon className="w-5 h-5" />
           ) : (
-            <EyeIcon className="w-5 h-5 text-gray-500" />
+            <EyeIcon className="w-5 h-5" />
           )}
         </button>
       </div>
@@ -193,7 +196,6 @@ function Register({ onRegister }) {
         required
       />
 
-      {/* Checkbox de términos y condiciones */}
       <div className="flex items-center">
         <input
           type="checkbox"
@@ -205,7 +207,7 @@ function Register({ onRegister }) {
           required
         />
         <label htmlFor="termsAccepted" className="text-sm text-gray-600">
-          Acepto los{' '}
+          Acepto los{" "}
           <a href="#" className="text-indigo-600 hover:underline">
             términos y condiciones
           </a>

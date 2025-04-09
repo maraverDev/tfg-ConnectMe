@@ -113,4 +113,14 @@ class UserController extends Controller
 
         return response()->json(['message' => 'Usuario actualizado', 'user' => $user]);
     }
+    public function logout(Request $request)
+{
+    Auth::guard('web')->logout(); // importante para Sanctum
+
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+
+    return response()->json(['message' => 'Sesión cerrada']);
+}
+
 }

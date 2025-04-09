@@ -6,14 +6,14 @@ function Profile({ user }) {
   const [userPosts, setUserPosts] = useState([]);
 
   useEffect(() => {
-    // Cargar perfil del usuario
     if (user?.id) {
-      api.get(`/users/${user.id}`)
+      // Perfil
+      api.get(`/api/users/${user.id}`)
         .then(res => setUserData(res.data))
         .catch(err => console.error('Error cargando perfil:', err));
 
-      // Opcional: cargar sus publicaciones si la API lo permite
-      api.get('/posts')
+      // Posts propios
+      api.get('/api/posts')
         .then(res => {
           const ownPosts = res.data.filter(post => post.user.id === user.id);
           setUserPosts(ownPosts);

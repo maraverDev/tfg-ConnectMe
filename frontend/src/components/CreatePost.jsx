@@ -5,8 +5,8 @@ import ImageCropper from "./ImageCropper";
 import { Image as ImageIcon, RotateCcw } from "lucide-react";
 
 function CreatePost({ onPostCreated, user }) {
-  const [rawImage, setRawImage] = useState(null); // archivo base64
-  const [croppedBlob, setCroppedBlob] = useState(null); // blob recortado
+  const [rawImage, setRawImage] = useState(null);
+  const [croppedBlob, setCroppedBlob] = useState(null);
   const [caption, setCaption] = useState("");
 
   const handleImageChange = (e) => {
@@ -33,10 +33,10 @@ function CreatePost({ onPostCreated, user }) {
     const formData = new FormData();
     formData.append("image", croppedBlob, "cropped.jpg");
     formData.append("caption", caption);
-    formData.append("user_id", user.id);
+    // ❌ NO necesitas enviar user_id, Laravel lo saca de la sesión
 
     try {
-      await api.post("/posts", formData, {
+      await api.post("/api/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -49,6 +49,7 @@ function CreatePost({ onPostCreated, user }) {
 
       onPostCreated(true);
     } catch (error) {
+      console.error(error);
       Swal.fire({
         icon: "error",
         title: "Error al subir imagen",
@@ -67,13 +68,10 @@ function CreatePost({ onPostCreated, user }) {
         {!rawImage ? (
           <div className="flex justify-center items-center w-full h-56 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 cursor-pointer hover:border-indigo-500 transition">
             <label className="flex flex-col justify-center items-center w-full h-full cursor-pointer px-4">
-              {/* Icono Lucide 🌄 */}
               <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
-
               <p className="text-sm text-gray-500 text-center">
                 Haz clic para seleccionar una imagen
               </p>
-
               <input
                 type="file"
                 accept="image/*"
@@ -84,10 +82,7 @@ function CreatePost({ onPostCreated, user }) {
           </div>
         ) : (
           <>
-            <ImageCropper
-              image={rawImage}
-              onCropComplete={handleCropComplete}
-            />
+            <ImageCropper image={rawImage} onCropComplete={handleCropComplete} />
             <div className="text-right mt-2">
               <button
                 type="button"

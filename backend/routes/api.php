@@ -1,28 +1,34 @@
 <?php
 
+use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 
+// Autenticación
+// Route::post('/register', [UserController::class, 'register']);
+// Route::post('/login', [UserController::class, 'login']);
+// Route::post('/logout', [UserController::class, 'logout']);
 
-Route::post('/register', [UserController::class, 'register']);
-Route::post('/login', [UserController::class, 'login']);
+// Ruta especial para Sanctum - devuelve el usuario autenticado
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+// Usuarios públicos (ver perfil)
 Route::get('/users/{id}', [UserController::class, 'show']);
 
-Route::middleware('auth')->group(function () {
-    Route::get('/users/{id}', [UserController::class, 'show']);
-    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+// Rutas protegidas con Sanctum
+Route::middleware('auth:sanctum')->group(function () {
     Route::put('/users/{id}', [UserController::class, 'update']);
+    Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+    Route::post('/posts', [PostController::class, 'store']);
+    Route::put('/posts/{id}', [PostController::class, 'update']);
+    Route::delete('/posts/{id}', [PostController::class, 'destroy']);
 });
 
-// Listar todos los posts
-Route::get('/posts', [PostController::class, 'index']); //indexposts
-
-// Ver un post por ID
-Route::get('/posts/{id}', [PostController::class, 'show']); //pag indv post
-
-Route::middleware('auth')->group(function () {
-    Route::delete('/posts/{id}', [PostController::class, 'destroy']); //borrar
-    Route::post('/posts', [PostController::class, 'store']); //crear
-    Route::put('/posts/{id}', [PostController::class, 'update']); //act
-});
+// Posts públicos (cualquiera puede verlos)
+Route::get('/posts', [PostController::class, 'index']);
+Route::get('/posts/{id}', [PostController::class, 'show']);

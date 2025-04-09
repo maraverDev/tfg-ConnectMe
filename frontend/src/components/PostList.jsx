@@ -9,7 +9,7 @@ function PostList({ refresh }) {
 
   useEffect(() => {
     api
-      .get("/posts")
+      .get("/api/posts") // ✅ ruta corregida
       .then((response) => setPosts(response.data))
       .catch((err) => console.error("Error al obtener posts:", err));
   }, [refresh]);

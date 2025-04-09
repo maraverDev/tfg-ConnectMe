@@ -1,130 +1,165 @@
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { useParams } from "react-router-dom";
-import DynamicProfile from "./components/DynamicProfile"; // ← Importa este nuevo
-
+import { useEffect, useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
 import Profile from "./components/Profile";
+import DynamicProfile from "./components/DynamicProfile";
 import api from "./api";
 
-
 function App() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
+
   const [refresh, setRefresh] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  // ✅ Verificar sesión solo una vez al cargar
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (user) {
+        try {
+          const res = await api.get("/api/user");
+          if (res.data) {
+            setUser(res.data); // Actualiza el estado con el usuario desde la API
+          }
+        } catch (err) {
+          console.error("No autenticado");
+        }
+      }
+      setLoading(false); // Termina de cargar una vez verificado el estado
+    };
+
+    fetchUser();
+  }, []); // El arreglo vacío hace que solo se ejecute al montarse el componente
+
+  // Guardar usuario después de login o register
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+  };
+
+  const handleRegister = (userData) => {
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+  };
+
+  // Cerrar sesión correctamente
+  const handleLogout = async () => {
+    try {
+      await api.post("/api/logout");
+      localStorage.removeItem("user");
+      setUser(null);
+    } catch (err) {
+      console.error("Error al cerrar sesión", err);
+    }
+  };
 
   const handlePostCreated = () => setRefresh((prev) => !prev);
 
-  const handleLogout = async () => {
-    await api.post("/logout");
-    setUser(null);
-  };
+  if (loading) return <div className="text-center mt-10">Cargando...</div>;
 
   return (
-    <Router>
-      <div className="bg-gray-100 min-h-screen">
-        {/* NAVBAR siempre visible */}
-        <Navbar
-          user={user}
-          onLogout={handleLogout}
-          onShowCreatePost={() => setShowCreate(true)}
-        />
+    <div className="bg-gray-100 min-h-screen">
+      {/* NAVBAR */}
+      <Navbar
+        user={user}
+        onLogout={handleLogout}
+        onShowCreatePost={() => setShowCreate(true)}
+      />
 
-        {/* Modal para Crear Post */}
-        {user && showCreate && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
-            <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-xl">
-              <button
-                onClick={() => setShowCreate(false)}
-                className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-lg"
-              >
-                ✕
-              </button>
-              <CreatePost
-                onPostCreated={(p) => {
-                  handlePostCreated(p);
-                  setShowCreate(false);
-                }}
-                user={user}
-              />
-            </div>
+      {/* MODAL CREAR POST */}
+      {user && showCreate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20">
+          <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-xl">
+            <button
+              onClick={() => setShowCreate(false)}
+              className="absolute top-2 right-2 text-gray-500 hover:text-red-500 text-lg"
+            >
+              ✕
+            </button>
+            <CreatePost
+              onPostCreated={(p) => {
+                handlePostCreated(p);
+                setShowCreate(false);
+              }}
+              user={user}
+            />
           </div>
-        )}
-
-        {/* 🔽 Renderizado dinámico */}
-        <div className="p-6">
-          <Routes>
-            {/* Login */}
-            <Route
-              path="/login"
-              element={
-                <AuthPanel
-                  initialTab="login"
-                  onLogin={(userData) => {
-                    setUser(userData);
-                  }}
-                />
-              }
-            />
-
-            {/* Register */}
-            <Route
-              path="/register"
-              element={
-                <AuthPanel
-                  initialTab="register"
-                  onRegister={(userData) => {
-                    setUser(userData);
-                  }}
-                />
-              }
-            />
-
-            {/* Perfil */}
-            <Route
-              path="/profile"
-              element={
-                user ? <Profile user={user} /> : <div>Acceso no autorizado</div>
-              }
-            />
-
-            {/* Home */}
-            <Route
-              path="/home"
-              element={
-                user ? (
-                  <PostList refresh={refresh} />
-                ) : (
-                  <div className="text-center text-gray-500 mt-10">
-                    Inicia sesión para ver publicaciones 🎨
-                  </div>
-                )
-              }
-            />
-
-            {/* Root */}
-            <Route
-              path="/"
-              element={
-                user ? (
-                  <PostList refresh={refresh} />
-                ) : (
-                  <div className="text-center text-gray-500 mt-10">
-                    Inicia sesión para ver publicaciones 🎨
-                  </div>
-                )
-              }
-            />
-
-            <Route path="/profile/:id" element={<DynamicProfile />} />
-          </Routes>
         </div>
+      )}
+
+      {/* RUTAS */}
+      <div className="p-6">
+        <Routes>
+          {/* Login */}
+          <Route
+            path="/login"
+            element={
+              <AuthPanel onLogin={handleLogin} onRegister={handleRegister} />
+            }
+          />
+
+          {/* Register */}
+          <Route
+            path="/register"
+            element={
+              <AuthPanel onLogin={handleLogin} onRegister={handleRegister} />
+            }
+          />
+
+          {/* Perfil propio */}
+          <Route
+            path="/profile"
+            element={
+              user ? (
+                <Profile user={user} />
+              ) : (
+                <div className="text-center mt-10">Acceso no autorizado</div>
+              )
+            }
+          />
+
+          {/* Home / Lista de publicaciones */}
+          <Route
+            path="/home"
+            element={
+              user ? (
+                <PostList refresh={refresh} />
+              ) : (
+                <div className="text-center mt-10 text-gray-500">
+                  Inicia sesión para ver publicaciones 🎨
+                </div>
+              )
+            }
+          />
+
+          {/* Root redirige al home si hay user */}
+          <Route
+            path="/"
+            element={
+              user ? (
+                <PostList refresh={refresh} />
+              ) : (
+                <div className="text-center mt-10 text-gray-500">
+                  Inicia sesión para ver publicaciones 🎨
+                </div>
+              )
+            }
+          />
+
+          {/* Perfil de otro usuario */}
+          <Route path="/profile/:id" element={<DynamicProfile />} />
+        </Routes>
       </div>
-    </Router>
+    </div>
   );
 }
 

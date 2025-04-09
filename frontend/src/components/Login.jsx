@@ -12,7 +12,6 @@ function Login({ onLogin }) {
   const handleSubmit = async e => {
     e.preventDefault();
 
-    // Validación básica del frontend
     if (!form.email || !form.password) {
       Swal.fire({
         icon: 'error',
@@ -23,12 +22,16 @@ function Login({ onLogin }) {
     }
 
     try {
-      const response = await api.post('/login', form);
-      const userId = response.data.user.id;
-      const userResponse = await api.get(`/users/${userId}`);
+      // Paso 1: Obtener cookie CSRF
+      await api.get('/sanctum/csrf-cookie');
+
+      // Paso 2: Hacer login
+      await api.post('/api/login', form);
+
+      // Paso 3: Obtener usuario autenticado desde Sanctum
+      const userResponse = await api.get('/api/user');
       onLogin(userResponse.data);
 
-      // Mostrar mensaje de éxito al iniciar sesión
       Swal.fire({
         icon: 'success',
         title: '¡Bienvenido de nuevo!',
@@ -37,6 +40,7 @@ function Login({ onLogin }) {
         confirmButtonColor: '#4338CA'
       });
     } catch (err) {
+      console.error(err);
       Swal.fire({
         icon: 'error',
         title: '¡Error!',
