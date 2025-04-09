@@ -129,18 +129,6 @@ function App() {
             }
           />
 
-          {/* Editar Perfil propio */}
-          <Route
-            path="/edit/profile"
-            element={
-              user ? (
-                <EditProfile user={user} />
-              ) : (
-                <div className="text-center mt-10">Acceso no autorizado</div>
-              )
-            }
-          />
-
           {/* Home / Lista de publicaciones */}
           <Route
             path="/home"

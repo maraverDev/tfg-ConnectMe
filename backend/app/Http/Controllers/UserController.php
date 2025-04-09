@@ -104,24 +104,31 @@ class UserController extends Controller
             return response()->json(['message' => 'No autorizado'], 403);
         }
 
+        // Validación
         $data = $request->validate([
             'name' => 'sometimes|string|max:100',
             'bio' => 'nullable|string',
-            'avatar_url' => 'nullable|image',
+            'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Validación para imagen
             'city' => 'nullable|string|max:255',
         ]);
 
-        // Si hay una nueva imagen
+        // Si se sube una nueva imagen de perfil
         if ($request->hasFile('avatar_url')) {
-            $imagePath = $request->file('avatar_url')->store('avatars', 'public');
-            $data['avatar_url'] = asset('storage/' . $imagePath);
+            // Eliminar la imagen anterior si existe
+            if ($user->avatar_url) {
+                $imagePath = str_replace(asset('storage/'), '', $user->avatar_url);
+                Storage::disk('public')->delete($imagePath); // Eliminar la imagen anterior
+            }
+
+            // Guardamos la nueva imagen en la carpeta 'avatars'
+            $path = $request->file('avatar_url')->store('avatars', 'public');
+            $data['avatar_url'] = asset('storage/' . $path); // Guardar la URL pública de la imagen
         }
 
         $user->update($data);
 
-        return response()->json(['message' => 'Perfil actualizado', 'user' => $user]);
+        return response()->json(['message' => 'Usuario actualizado', 'user' => $user]);
     }
-
 
     public function logout(Request $request)
     {
