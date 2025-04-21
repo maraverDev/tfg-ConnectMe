@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 
-// import EditProfile from "./components/EditProfile";
+import EditProfile from "./components/EditProfile";
 import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
@@ -62,6 +62,10 @@ function App() {
     } catch (err) {
       console.error("Error al cerrar sesión", err);
     }
+  };
+
+  const handleProfileUpdated = (updatedUser) => {
+    setUser(updatedUser); // Actualiza el estado con los nuevos datos del usuario
   };
 
   const handlePostCreated = () => setRefresh((prev) => !prev);
@@ -159,6 +163,16 @@ function App() {
 
           {/* Perfil de otro usuario */}
           <Route path="/profile/:id" element={<DynamicProfile />} />
+
+          <Route
+            path="/profile/edit"
+            element={
+              <EditProfile
+                user={user}
+                onProfileUpdated={handleProfileUpdated}
+              />
+            }
+          />
         </Routes>
       </div>
     </div>

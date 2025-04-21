@@ -98,37 +98,33 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Encontrar al usuario
         $user = User::findOrFail($id);
 
-        if (Auth::id() !== $user->id) {
-            return response()->json(['message' => 'No autorizado'], 403);
-        }
-
-        // Validación
-        $data = $request->validate([
-            'name' => 'sometimes|string|max:100',
+        // Validación de los datos
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email', // Asegúrate de que el email es válido
             'bio' => 'nullable|string',
-            'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',  // Validación para imagen
             'city' => 'nullable|string|max:255',
         ]);
 
-        // Si se sube una nueva imagen de perfil
-        if ($request->hasFile('avatar_url')) {
-            // Eliminar la imagen anterior si existe
-            if ($user->avatar_url) {
-                $imagePath = str_replace(asset('storage/'), '', $user->avatar_url);
-                Storage::disk('public')->delete($imagePath); // Eliminar la imagen anterior
-            }
+        // Actualizar los datos del usuario
+        $user->name = $validated['name'];
+        $user->email = $validated['email']; // Aseguramos que el email sea válido
+        $user->bio = $validated['bio'] ?? $user->bio;
+        $user->city = $validated['city'] ?? $user->city;
 
-            // Guardamos la nueva imagen en la carpeta 'avatars'
-            $path = $request->file('avatar_url')->store('avatars', 'public');
-            $data['avatar_url'] = asset('storage/' . $path); // Guardar la URL pública de la imagen
-        }
+        // Guardar los cambios
+        $user->save();
 
-        $user->update($data);
-
-        return response()->json(['message' => 'Usuario actualizado', 'user' => $user]);
+        // Devolver el usuario actualizado
+        return response()->json($user, 200);
     }
+
+
+
+
 
     public function logout(Request $request)
     {
@@ -136,7 +132,6 @@ class UserController extends Controller
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-
         return response()->json(['message' => 'Sesión cerrada']);
     }
 }

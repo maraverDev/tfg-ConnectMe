@@ -6,10 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 
-// Autenticación
-// Route::post('/register', [UserController::class, 'register']);
-// Route::post('/login', [UserController::class, 'login']);
-// Route::post('/logout', [UserController::class, 'logout']);
 
 // Ruta especial para Sanctum - devuelve el usuario autenticado
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
