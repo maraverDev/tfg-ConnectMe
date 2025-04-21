@@ -30,7 +30,7 @@ function DynamicProfile() {
         <img
           src={userData.avatar_url || 'https://www.gravatar.com/avatar/?d=mp'}
           alt="Avatar"
-          className="w-24 h-24 rounded-full border"
+          className="w-24 h-24 rounded-full border-4 object-cover shadow-lg"
         />
         <div>
           <h2 className="text-2xl font-bold text-gray-800">{userData.name}</h2>
@@ -47,7 +47,7 @@ function DynamicProfile() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {userPosts.map((post) => (
             <div key={post.id} className="rounded overflow-hidden shadow border">
-              <img src={post.image_url} alt="Post" className="w-full h-48" />
+              <img src={post.image_url} alt="Post" className="w-full h-48 object-cover" />
               <div className="p-3">
                 <p className="text-sm text-gray-700">{post.caption}</p>
               </div>

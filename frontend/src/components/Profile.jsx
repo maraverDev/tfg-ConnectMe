@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { PencilIcon, CheckIcon } from '@heroicons/react/24/solid';  // Añadimos el ícono de "check" para guardar
+import { PencilIcon, CheckIcon } from "@heroicons/react/24/solid"; // Importamos los iconos
 import api from "../api";
 
 function Profile({ user }) {
@@ -70,10 +70,39 @@ function Profile({ user }) {
           {/* Avatar */}
           <div className="relative">
             <img
-              src={userData.avatar_url || "https://www.gravatar.com/avatar/?d=mp"}
+              src={
+                userData.avatar_url || "https://www.gravatar.com/avatar/?d=mp"
+              }
               alt="Avatar"
-              className="w-24 h-24 rounded-full border-4 border-indigo-500 object-cover shadow-lg"
+              className="w-24 h-24 rounded-full border-4 border-indigo-600 object-cover shadow-lg"
             />
+            {/* Icono de editar */}
+            {/* <button
+              onClick={() => setIsEditing(!isEditing)}  // Cambia el modo de edición
+              className="absolute bottom-0 right-0 bg-indigo-600 text-white rounded-full p-2 shadow-md hover:bg-indigo-700 transition-all"
+            >
+              {isEditing ? (
+                <CheckIcon className="w-5 h-5" />
+              ) : (
+                <PencilIcon className="w-5 h-5" />
+              )}
+            </button> */}
+
+            {isEditing ? (
+              <button
+                onClick={handleSave}
+                className="absolute bottom-0 right-0 bg-indigo-600 text-white rounded-full p-2 shadow-md hover:bg-indigo-700 transition-all"
+              >
+                <CheckIcon className="w-5 h-5" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsEditing(true)} // Activa el modo de edición
+                className="absolute bottom-0 right-0 bg-indigo-600 text-white rounded-full p-2 shadow-md hover:bg-indigo-700 transition-all"
+              >
+                <PencilIcon className="w-5 h-5" />
+              </button>
+            )}
           </div>
 
           {/* Información del usuario */}
@@ -124,33 +153,14 @@ function Profile({ user }) {
             </p>
           </div>
         </div>
-
-        {/* Botón de editar o guardar */}
-        <div>
-          {isEditing ? (
-            <button
-              onClick={handleSave}
-              className="text-sm text-indigo-600 bg-transparent border border-indigo-600 hover:bg-indigo-600 hover:text-white px-3 py-1 rounded-full transition-all"
-            >
-              <CheckIcon className="w-5 h-5 inline" />
-              Guardar cambios
-            </button>
-          ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-sm text-indigo-600 hover:underline"
-            >
-              <PencilIcon className="w-5 h-5 inline" />
-              Editar perfil
-            </button>
-          )}
-        </div>
       </div>
 
       <hr className="my-6" />
 
       {/* Sección de publicaciones */}
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">Mis publicaciones</h3>
+      <h3 className="text-lg font-semibold text-gray-700 mb-4">
+        Mis publicaciones
+      </h3>
 
       {userPosts.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
