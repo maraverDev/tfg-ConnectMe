@@ -39,9 +39,3 @@
 ## ⚙️ Instalación local
 
 ## 🔜 PROXIMAMENTE
-
-### 1. Clonar el repositorio
-
-```bash
-git clone https://github.com/tuusuario/connectme.git
-cd connectme
