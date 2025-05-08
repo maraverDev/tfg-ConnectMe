@@ -5,7 +5,7 @@
 !/backend/storage/app
 !/backend/storage/framework
 !/backend/storage/logs
-
+/docs
 /backend_old
 /frontend_old
 

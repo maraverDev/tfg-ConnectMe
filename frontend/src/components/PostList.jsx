@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { FaHeart, FaCommentDots, FaEye } from "react-icons/fa";
 
 function PostList({ refresh }) {
   const [posts, setPosts] = useState([]);
@@ -9,13 +10,22 @@ function PostList({ refresh }) {
 
   useEffect(() => {
     api
-      .get("/api/posts") // ✅ ruta corregida
+      .get("/api/posts")
       .then((response) => setPosts(response.data))
       .catch((err) => console.error("Error al obtener posts:", err));
   }, [refresh]);
 
+  const handleLike = async (postId) => {
+    try {
+      await api.post(`/api/posts/${postId}/like`);
+      // Aquí puedes actualizar el estado de likes si lo implementas
+    } catch (error) {
+      console.error("Error al dar like:", error);
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto px-4">
       {posts.length === 0 ? (
         <p className="text-center text-gray-400 mt-20">
           No hay publicaciones todavía. ¡Sé el primero en crear una! 🚀
@@ -36,11 +46,35 @@ function PostList({ refresh }) {
                 className="w-full h-56 object-cover"
               />
               <div className="p-4">
-                <p className="text-gray-700 text-sm mb-2">
+                <p className="text-gray-700 text-sm mb-3">
                   {post.caption || "Sin descripción."}
                 </p>
+
+                <div className="flex justify-between items-center mb-3">
+                  <button
+                    onClick={() => handleLike(post.id)}
+                    className="text-gray-500 hover:text-red-500 transition-colors duration-200"
+                  >
+                    <FaHeart size={18} />
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/post/${post.id}`)}
+                    className="text-gray-500 hover:text-blue-500 transition-colors duration-200"
+                  >
+                    <FaEye size={18} />
+                  </button>
+
+                  <button
+                    onClick={() => navigate(`/post/${post.id}#comentarios`)}
+                    className="text-gray-500 hover:text-purple-500 transition-colors duration-200"
+                  >
+                    <FaCommentDots size={18} />
+                  </button>
+                </div>
+
                 <div
-                  className="flex items-center gap-3 mt-4 cursor-pointer"
+                  className="flex items-center gap-3 cursor-pointer"
                   onClick={() => navigate(`/profile/${post.user.id}`)}
                 >
                   <img
@@ -49,7 +83,7 @@ function PostList({ refresh }) {
                       "https://www.gravatar.com/avatar/?d=mp"
                     }
                     alt={post.user.name}
-                    className="w-10 h-10 rounded-full border"
+                    className="w-10 h-10 rounded-full border object-cover"
                   />
                   <div>
                     <p className="text-sm font-semibold text-gray-800">
