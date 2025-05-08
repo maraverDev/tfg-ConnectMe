@@ -59,7 +59,7 @@ function PostDetail() {
                 "https://www.gravatar.com/avatar/?d=mp"
               }
               alt={post.user.name}
-              className="w-10 h-10 rounded-full border"
+              className="w-10 h-10 rounded-full border object-cover"
             />
             <div>
               <p className="text-sm font-semibold text-gray-800">

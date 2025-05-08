@@ -3,29 +3,24 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Comment extends Model
+class Post extends Model
 {
-    use HasFactory;
-
-    protected $table = 'comments';
+    public $timestamps = false; // Solo usamos created_at
 
     protected $fillable = [
-        'content',
         'user_id',
-        'post_id',
+        'image_url',
+        'caption',
+        'created_at',
     ];
 
-    // Relación con el usuario que hizo el comentario
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
-    // Relación con el post al que pertenece el comentario
-    public function post()
+    public function comments()
     {
-        return $this->belongsTo(Post::class);
+        return $this->hasMany(Comment::class);
     }
 }

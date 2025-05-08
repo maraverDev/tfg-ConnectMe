@@ -30,6 +30,9 @@ Route::middleware('auth:sanctum')->group(function () {
 // Posts públicos (cualquiera puede verlos)
 Route::get('/posts', [PostController::class, 'index']);
 Route::get('/posts/{id}', [PostController::class, 'show']);
+
+
 Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
+
 
 Route::post('/posts/{id}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');

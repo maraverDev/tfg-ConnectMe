@@ -8,6 +8,8 @@ import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
 import Profile from "./components/Profile";
+import PostDetail from "./components/PostDetail";
+
 import DynamicProfile from "./components/DynamicProfile";
 import api from "./api";
 
@@ -173,9 +175,8 @@ function App() {
               />
             }
           />
+          <Route path="/post/:id" element={<PostDetail />} />
         </Routes>
-
-        <Route path="/post/:id" element={<PostDetail />} />
       </div>
     </div>
   );
