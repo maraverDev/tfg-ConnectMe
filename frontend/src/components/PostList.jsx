@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaHeart, FaCommentDots, FaEye } from "react-icons/fa";
+import { FaHeart, FaCommentDots, FaEye, FaHeartBroken } from "react-icons/fa";
 
 function PostList({ refresh }) {
   const [posts, setPosts] = useState([]);
@@ -11,17 +11,36 @@ function PostList({ refresh }) {
   useEffect(() => {
     api
       .get("/api/posts")
-      .then((response) => setPosts(response.data))
+      .then((response) => {
+        const postsWithLikes = response.data.map((post) => ({
+          ...post,
+          liked: post.is_liked || false,
+          isHovered: false, // 👈 para el hover individual
+        }));
+        setPosts(postsWithLikes);
+      })
       .catch((err) => console.error("Error al obtener posts:", err));
   }, [refresh]);
 
-  const handleLike = async (postId) => {
+  const toggleLike = async (postId) => {
     try {
       await api.post(`/api/posts/${postId}/like`);
-      // Aquí puedes actualizar el estado de likes si lo implementas
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, liked: !post.liked } : post
+        )
+      );
     } catch (error) {
       console.error("Error al dar like:", error);
     }
+  };
+
+  const handleHover = (postId, value) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId ? { ...post, isHovered: value } : post
+      )
+    );
   };
 
   return (
@@ -52,10 +71,34 @@ function PostList({ refresh }) {
 
                 <div className="flex justify-between items-center mb-3">
                   <button
-                    onClick={() => handleLike(post.id)}
-                    className="text-gray-500 hover:text-red-500 transition-colors duration-200"
+                    onClick={() => toggleLike(post.id)}
+                    onMouseEnter={() => handleHover(post.id, true)}
+                    onMouseLeave={() => handleHover(post.id, false)}
+                    className={`relative w-6 h-6 flex items-center justify-center transition-colors duration-300 ${
+                      post.liked
+                        ? "text-red-500"
+                        : "text-gray-400 hover:text-red-500"
+                    }`}
                   >
-                    <FaHeart size={18} />
+                    <span
+                      className={`absolute transition-opacity duration-300 ${
+                        post.liked && post.isHovered
+                          ? "opacity-0"
+                          : "opacity-100"
+                      }`}
+                    >
+                      <FaHeart size={18} />
+                    </span>
+
+                    <span
+                      className={`absolute transition-opacity duration-300 ${
+                        post.liked && post.isHovered
+                          ? "opacity-100"
+                          : "opacity-0"
+                      }`}
+                    >
+                      <FaHeartBroken size={18} />
+                    </span>
                   </button>
 
                   <button

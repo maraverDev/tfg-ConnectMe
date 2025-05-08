@@ -1,20 +1,37 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
-import { FaHeart, FaArrowLeft } from "react-icons/fa";
+import { FaHeart, FaArrowLeft, FaHeartBroken } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 function PostDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
+  const [isLiked, setIsLiked] = useState(false);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
-    api.get(`/api/posts/${id}`).then((res) => setPost(res.data));
-    api.get(`/api/posts/${id}/comments`).then((res) => setComments(res.data));
+    api.get(`/api/posts/${id}`).then((res) => {
+      setPost(res.data);
+      setIsLiked(res.data.is_liked || false);
+    });
+
+    api.get(`/api/posts/${id}/comments`).then((res) => {
+      setComments(res.data);
+    });
   }, [id]);
+
+  const toggleLike = async () => {
+    try {
+      await api.post(`/api/posts/${id}/like`);
+      setIsLiked((prev) => !prev);
+    } catch (error) {
+      console.error("Error al dar like:", error);
+    }
+  };
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -71,12 +88,31 @@ function PostDetail() {
             </div>
           </div>
 
-          <button
-            onClick={() => console.log("Like")}
-            className="text-gray-500 hover:text-red-500 transition-colors"
+          {/* Botón de like con transición suave */}
+          <div
+            onMouseEnter={() => setHovered(true)}
+            onMouseLeave={() => setHovered(false)}
+            className={`relative w-6 h-6 flex items-center justify-center transition-colors duration-200 cursor-pointer ${
+              isLiked ? "text-red-500" : "text-gray-400 hover:text-red-400"
+            }`}
+            onClick={toggleLike}
           >
-            <FaHeart size={20} />
-          </button>
+            <span
+              className={`absolute transition-opacity duration-200 ${
+                isLiked && hovered ? "opacity-0" : "opacity-100"
+              }`}
+            >
+              <FaHeart size={20} />
+            </span>
+
+            <span
+              className={`absolute transition-opacity duration-200 ${
+                isLiked && hovered ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <FaHeartBroken size={20} />
+            </span>
+          </div>
         </div>
       </motion.div>
 

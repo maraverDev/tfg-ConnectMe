@@ -12,7 +12,18 @@ class PostController extends Controller
     // Listar todos los posts con usuario relacionado
     public function index()
     {
-        $posts = Post::with('user')->latest()->get();
+        $userId = Auth::id();
+
+        $posts = \App\Models\Post::with(['user'])
+            ->latest()
+            ->get()
+            ->map(function ($post) use ($userId) {
+                $post->is_liked = $userId
+                    ? $post->likes()->where('user_id', $userId)->exists()
+                    : false;
+                return $post;
+            });
+    
         return response()->json($posts);
     }
 
@@ -42,9 +53,13 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::with('user')->findOrFail($id);
+    
+        $post->is_liked = auth()->check()
+            ? $post->likes()->where('user_id', auth()->id())->exists()
+            : false;
+    
         return response()->json($post);
     }
-
 
     // Eliminar un post (solo si pertenece al usuario)
     public function destroy($id)

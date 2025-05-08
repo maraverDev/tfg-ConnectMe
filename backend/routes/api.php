@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\LikeController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
@@ -33,6 +34,7 @@ Route::get('/posts/{id}', [PostController::class, 'show']);
 
 
 Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
-
-
 Route::post('/posts/{id}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
+
+Route::post('/posts/{id}/like', [LikeController::class, 'toggle'])->middleware('auth:sanctum');
+
