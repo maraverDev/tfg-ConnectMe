@@ -4,7 +4,7 @@ import api from "../api";
 import { PencilIcon, CheckIcon } from "@heroicons/react/24/solid";
 import Swal from "sweetalert2";
 
-function DynamicProfile() {
+function Profile() {
   const { id } = useParams();
   const [currentUser, setCurrentUser] = useState(null);
   const [userData, setUserData] = useState(null);
@@ -17,8 +17,7 @@ function DynamicProfile() {
   const [form, setForm] = useState({
     name: "",
     bio: "",
-    city: "",
-    email: "", // ✅ obligatorio aunque no editable
+    city: ""
   });
 
   const isOwnProfile = currentUser?.id === parseInt(id);
@@ -38,8 +37,7 @@ function DynamicProfile() {
         setForm({
           name: res.data.name || "",
           bio: res.data.bio || "",
-          city: res.data.city || "",
-          email: res.data.email || "" // ✅ se guarda aunque no se edite
+          city: res.data.city || ""
         });
       })
       .catch(err => console.error("Error cargando perfil:", err));
@@ -103,7 +101,7 @@ function DynamicProfile() {
             <img
               src={userData.avatar_url || "https://www.gravatar.com/avatar/?d=mp"}
               alt="Avatar"
-              className="w-24 h-24 rounded-full border-4 border-indigo-600 object-cover shadow-lg"
+              className="w-24 h-24 rounded-full border-4 object-cover shadow-lg"
             />
             {isOwnProfile && (
               isEditing ? (
@@ -150,9 +148,6 @@ function DynamicProfile() {
               ) : (
                 userData.city || "Ciudad no especificada"
               )}
-            </p>
-            <p className="text-sm text-gray-500 mt-1">
-              {userData.email}
             </p>
             <p className="text-sm text-gray-500 mt-2">
               {isOwnProfile && isEditing ? (
@@ -215,4 +210,4 @@ function DynamicProfile() {
   );
 }
 
-export default DynamicProfile;
+export default Profile;

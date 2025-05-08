@@ -39,4 +39,15 @@ class FollowController extends Controller
 
               return response()->json(['followed' => $isFollowing]);
        }
+       public function followersCount($id)
+       {
+              $followers = Follow::where('followed_id', $id)->count();
+              return response()->json(['followers' => $followers]);
+       }
+
+       public function followingCount($id)
+       {
+              $following = Follow::where('follower_id', $id)->count();
+              return response()->json(['following' => $following]);
+       }
 }

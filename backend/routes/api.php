@@ -44,3 +44,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/users/{id}/follow', [FollowController::class, 'toggleFollow']);
     Route::get('/users/{id}/follow', [FollowController::class, 'isFollowing']);
 });
+Route::get('/users/{id}/followers-count', [FollowController::class, 'followersCount']);
+Route::get('/users/{id}/following-count', [FollowController::class, 'followingCount']);
