@@ -1,12 +1,14 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\LikeController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
+use App\Http\Controllers\FollowController;
+
 
 
 
@@ -38,3 +40,7 @@ Route::post('/posts/{id}/comments', [CommentController::class, 'store'])->middle
 
 Route::post('/posts/{id}/like', [LikeController::class, 'toggle'])->middleware('auth:sanctum');
 
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/users/{id}/follow', [FollowController::class, 'toggleFollow']);
+    Route::get('/users/{id}/follow', [FollowController::class, 'isFollowing']);
+});

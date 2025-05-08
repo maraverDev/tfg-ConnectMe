@@ -12,6 +12,8 @@ function PostDetail() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [hovered, setHovered] = useState(false);
+  const [pop, setPop] = useState(false);
+  
 
   useEffect(() => {
     api.get(`/api/posts/${id}`).then((res) => {
@@ -28,6 +30,14 @@ function PostDetail() {
     try {
       await api.post(`/api/posts/${id}/like`);
       setIsLiked((prev) => !prev);
+      setPost((prev) => ({
+        ...prev,
+        likes_count: prev.likes_count + (isLiked ? -1 : 1),
+      }));
+
+      // animación tipo "pop"
+      setPop(true);
+      setTimeout(() => setPop(false), 150);
     } catch (error) {
       console.error("Error al dar like:", error);
     }
@@ -48,7 +58,8 @@ function PostDetail() {
     }
   };
 
-  if (!post) return <p className="text-center mt-10">Cargando publicación...</p>;
+  if (!post)
+    return <p className="text-center mt-10">Cargando publicación...</p>;
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -65,15 +76,18 @@ function PostDetail() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
       >
-        <img src={post.image_url} alt="Post" className="w-full h-80 object-cover" />
+        <img
+          src={post.image_url}
+          alt="Post"
+          className="w-full h-80 object-cover"
+        />
         <div className="p-4">
           <p className="text-gray-700 text-lg mb-4">{post.caption}</p>
 
           <div className="flex items-center gap-3 mb-4">
             <img
               src={
-                post.user.avatar_url ||
-                "https://www.gravatar.com/avatar/?d=mp"
+                post.user.avatar_url || "https://www.gravatar.com/avatar/?d=mp"
               }
               alt={post.user.name}
               className="w-10 h-10 rounded-full border object-cover"
@@ -89,28 +103,39 @@ function PostDetail() {
           </div>
 
           {/* Botón de like con transición suave */}
-          <div
-            onMouseEnter={() => setHovered(true)}
-            onMouseLeave={() => setHovered(false)}
-            className={`relative w-6 h-6 flex items-center justify-center transition-colors duration-200 cursor-pointer ${
-              isLiked ? "text-red-500" : "text-gray-400 hover:text-red-400"
-            }`}
-            onClick={toggleLike}
-          >
-            <span
-              className={`absolute transition-opacity duration-200 ${
-                isLiked && hovered ? "opacity-0" : "opacity-100"
+
+          <div className="flex items-center gap-2">
+            <div
+              onMouseEnter={() => setHovered(true)}
+              onMouseLeave={() => setHovered(false)}
+              onClick={toggleLike}
+              className={`relative w-6 h-6 flex items-center justify-center transition-colors duration-200 cursor-pointer ${
+                isLiked ? "text-red-500" : "text-gray-400 hover:text-red-400"
               }`}
             >
-              <FaHeart size={20} />
-            </span>
+              <span
+                className={`absolute transition-opacity duration-200 ${
+                  isLiked && hovered ? "opacity-0" : "opacity-100"
+                }`}
+              >
+                <FaHeart size={20} />
+              </span>
+
+              <span
+                className={`absolute transition-opacity duration-200 ${
+                  isLiked && hovered ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                <FaHeartBroken size={20} />
+              </span>
+            </div>
 
             <span
-              className={`absolute transition-opacity duration-200 ${
-                isLiked && hovered ? "opacity-100" : "opacity-0"
+              className={`text-md text-gray-600 transition-transform duration-150 mb-0.5 ${
+                pop ? "scale-125" : "scale-100"
               }`}
             >
-              <FaHeartBroken size={20} />
+              {post.likes_count}
             </span>
           </div>
         </div>

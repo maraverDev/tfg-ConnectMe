@@ -20,7 +20,7 @@ class UserController extends Controller
                 'password' => 'required|string|min:6|confirmed', // Usamos "confirmed" para la validación de contraseñas
                 'bio' => 'nullable|string',
                 'city' => 'nullable|string',
-                'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048' // Validación para imagen
+                'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1000000' // Validación para imagen
             ]);
 
             // Crear el nuevo usuario

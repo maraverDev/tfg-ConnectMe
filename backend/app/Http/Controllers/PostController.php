@@ -23,7 +23,7 @@ class PostController extends Controller
                     : false;
                 return $post;
             });
-    
+
         return response()->json($posts);
     }
 
@@ -53,11 +53,12 @@ class PostController extends Controller
     public function show($id)
     {
         $post = Post::with('user')->findOrFail($id);
-    
+
         $post->is_liked = auth()->check()
             ? $post->likes()->where('user_id', auth()->id())->exists()
             : false;
-    
+        $post->likes_count = $post->likes()->count();
+
         return response()->json($post);
     }
 

@@ -21,9 +21,9 @@ function Navbar({ user, onLogout, onShowCreatePost }) {
           {/* Botón para añadir post */}
           <button
             onClick={onShowCreatePost}
-            className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700 flex items-center gap-1 text-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center gap-2 text-sm"
           >
-            <PlusIcon className="w-4 h-4" />
+            <PlusIcon className="w-5 h-5" />
             <span>Añadir</span>
           </button>
 
