@@ -39,12 +39,12 @@ class PostController extends Controller
         ], 201);
     }
 
-    // Mostrar un solo post
     public function show($id)
     {
         $post = Post::with('user')->findOrFail($id);
         return response()->json($post);
     }
+
 
     // Eliminar un post (solo si pertenece al usuario)
     public function destroy($id)

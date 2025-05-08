@@ -174,6 +174,8 @@ function App() {
             }
           />
         </Routes>
+
+        <Route path="/post/:id" element={<PostDetail />} />
       </div>
     </div>
   );
