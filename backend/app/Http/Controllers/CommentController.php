@@ -13,11 +13,12 @@ class CommentController extends Controller
        {
               $comments = Comment::with('user')
                      ->where('post_id', $postId)
-                     ->orderBy('created_at', 'asc')
-                     ->get();
+                     ->orderBy('created_at', 'asc') // o 'asc', tú eliges
+                     ->paginate(5); // ✅ esto ya ejecuta
 
               return response()->json($comments);
        }
+
        public function store(Request $request, $postId)
        {
               $request->validate([

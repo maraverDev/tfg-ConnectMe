@@ -1,4 +1,6 @@
 import { useRef } from "react";
+import { FiMoreVertical } from "react-icons/fi";
+
 import Swal from "sweetalert2";
 
 import { useEffect, useState } from "react";
@@ -13,7 +15,10 @@ function PostDetail() {
   const [post, setPost] = useState(null);
   const [isLiked, setIsLiked] = useState(false);
   const [comments, setComments] = useState([]);
-  const [newComment, setNewComment] = useState("");
+  const [commentPage, setCommentPage] = useState(1);
+  const [commentTotalPages, setCommentTotalPages] = useState(1);
+  const [newComment, setNewComment] = useState(""); // Esto debe existir
+
   const [hovered, setHovered] = useState(false);
   const [pop, setPop] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
@@ -31,8 +36,9 @@ function PostDetail() {
       .then((res) => setCurrentUser(res.data))
       .catch((err) => console.error("Error obteniendo usuario:", err));
 
-    api.get(`/api/posts/${id}/comments`).then((res) => {
-      setComments(res.data);
+    api.get(`/api/posts/${id}/comments?page=${commentPage}`).then((res) => {
+      setComments(res.data.data);
+      setCommentTotalPages(res.data.last_page);
     });
 
     const handleClickOutside = (event) => {
@@ -43,7 +49,7 @@ function PostDetail() {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [id]);
+  }, [id, commentPage]);
 
   const toggleLike = async () => {
     try {
@@ -210,18 +216,44 @@ function PostDetail() {
               >
                 <div className="flex items-start gap-3">
                   <img
+                    onClick={() =>
+                      comment.user?.id &&
+                      navigate(`/profile/${comment.user.id}`)
+                    }
                     src={
                       comment.user?.avatar_url ||
                       "https://www.gravatar.com/avatar/?d=mp"
                     }
                     alt={comment.user?.name}
-                    className="w-10 h-10 rounded-full object-cover border"
+                    className="w-10 h-10 rounded-full object-cover border mt-0.5 cursor-pointer"
                   />
                   <div>
                     <p className="text-sm text-gray-700">{comment.content}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      por {comment.user?.name || "Anónimo"}
+                      por {comment.user?.name || "Anónimo"} ·{" "}
+                      {new Date(comment.created_at).toLocaleDateString(
+                        "es-ES",
+                        {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        }
+                      )}
                     </p>
+                  </div>
+
+                  {/* Botón de tres puntos */}
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(
+                          openMenuId === comment.id ? null : comment.id
+                        )
+                      }
+                      className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                    >
+                      <FiMoreVertical size={18} />
+                    </button>
                   </div>
                 </div>
 
@@ -259,6 +291,26 @@ function PostDetail() {
           </ul>
         )}
       </div>
+      {commentTotalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-4">
+          <button
+            onClick={() => setCommentPage((p) => Math.max(p - 1, 1))}
+            disabled={commentPage === 1}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() =>
+              setCommentPage((p) => Math.min(p + 1, commentTotalPages))
+            }
+            disabled={commentPage === commentTotalPages}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+          >
+            Siguiente
+          </button>
+        </div>
+      )}
 
       {/* Formulario para comentar */}
       <form onSubmit={handleCommentSubmit} className="mt-6">

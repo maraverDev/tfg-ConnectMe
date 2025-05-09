@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer"; // ajusta el path según tu estructura
 
 import EditProfile from "./components/EditProfile";
 import AuthPanel from "./components/AuthPanel";
@@ -104,7 +105,7 @@ function App() {
       )}
 
       {/* RUTAS */}
-      <div className="p-6">
+      <div className="p-6 pb-20">
         <Routes>
           {/* Login */}
           <Route
@@ -121,8 +122,6 @@ function App() {
               <AuthPanel onLogin={handleLogin} onRegister={handleRegister} />
             }
           />
-
-         
 
           {/* Home / Lista de publicaciones */}
           <Route
@@ -167,6 +166,7 @@ function App() {
           <Route path="/post/:id" element={<PostDetail />} />
         </Routes>
       </div>
+      <Footer />
     </div>
   );
 }

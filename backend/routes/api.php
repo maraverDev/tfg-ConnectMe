@@ -44,6 +44,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
 
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->middleware('throttle:1,6'); // 1 comentario / 10s
+    Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->middleware('throttle:6,1'); // 1 comentario / 10s
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('throttle:5,1'); // borrar protegido
 });
