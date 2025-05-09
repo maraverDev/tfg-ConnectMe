@@ -11,9 +11,34 @@ use App\Http\Controllers\NotificationController;
 
 
 // 🔐 Usuario autenticado
+use App\Models\Notification;
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    $user = $request->user();
+
+    $user->unread_notifications = Notification::where('user_id', $user->id)
+        ->where('read', false)
+        ->count();
+
+    return $user;
 });
+
+Route::middleware('auth:sanctum')->get('/notifications/unread-count', function () {
+    return response()->json([
+        'count' => \App\Models\Notification::where('user_id', auth()->id())
+            ->where('read', false)
+            ->count(),
+    ]);
+});
+
+Route::put('/notifications/read-all', function () {
+    \App\Models\Notification::where('user_id', auth()->id())
+        ->where('read', false)
+        ->update(['read' => true]);
+
+    return response()->json(['message' => 'Todas las notificaciones leídas']);
+})->middleware('auth:sanctum');
+
 
 // 🧑‍💼 Usuarios (ver perfil)
 Route::get('/users/{id}', [UserController::class, 'show']);

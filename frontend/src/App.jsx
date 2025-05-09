@@ -44,6 +44,18 @@ function App() {
     fetchUser();
   }, []); // El arreglo vacío hace que solo se ejecute al montarse el componente
 
+  // 🔁 Polling cada 10 segundos para actualizar notificaciones
+  useEffect(() => {
+    const interval = setInterval(() => {
+      api
+        .get("/api/user", { withCredentials: true })
+        .then((res) => setUser(res.data))
+        .catch((err) => console.error("Error actualizando usuario:", err));
+    }, 10000); // cada 10 segundos
+
+    return () => clearInterval(interval);
+  }, []); // 👈 IMPORTANTE: sin dependencias
+
   // Guardar usuario después de login o register
   const handleLogin = (userData) => {
     setUser(userData);
