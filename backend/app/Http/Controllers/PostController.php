@@ -16,8 +16,8 @@ class PostController extends Controller
 
         $posts = \App\Models\Post::with(['user'])
             ->latest()
-            ->get()
-            ->map(function ($post) use ($userId) {
+            ->paginate(9)
+            ->through(function ($post) use ($userId) {
                 $post->is_liked = $userId
                     ? $post->likes()->where('user_id', $userId)->exists()
                     : false;

@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import Swal from "sweetalert2";
 
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -72,17 +73,46 @@ function PostDetail() {
       setComments((prev) => [...prev, res.data]);
       setNewComment("");
     } catch (error) {
-      console.error("Error al comentar:", error);
+      if (error.response?.status === 429) {
+        Swal.fire({
+          icon: "warning",
+          title: "Espera un momento",
+          text: "Debes esperar unos segundos antes de enviar otro comentario.",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo enviar el comentario.",
+        });
+      }
     }
   };
+
   const handleDeleteComment = async (commentId) => {
-    try {
-      await api.delete(`/api/comments/${commentId}`);
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
-    } catch (error) {
-      console.error("Error al eliminar comentario:", error);
+    const confirm = await Swal.fire({
+      title: "¿Eliminar comentario?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await api.delete(`/api/comments/${commentId}`);
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+        Swal.fire("¡Eliminado!", "El comentario ha sido eliminado.", "success");
+      } catch (error) {
+        console.error("Error al eliminar comentario:", error);
+        Swal.fire("Error", "No se pudo eliminar el comentario.", "error");
+      }
     }
   };
+
   if (!post)
     return <p className="text-center mt-10">Cargando publicación...</p>;
 
@@ -178,25 +208,21 @@ function PostDetail() {
                 key={comment.id}
                 className="bg-gray-100 p-3 rounded-md relative"
               >
-                <div className="flex justify-between items-start">
+                <div className="flex items-start gap-3">
+                  <img
+                    src={
+                      comment.user?.avatar_url ||
+                      "https://www.gravatar.com/avatar/?d=mp"
+                    }
+                    alt={comment.user?.name}
+                    className="w-10 h-10 rounded-full object-cover border"
+                  />
                   <div>
                     <p className="text-sm text-gray-700">{comment.content}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       por {comment.user?.name || "Anónimo"}
                     </p>
                   </div>
-
-                  {/* Botón de tres puntos */}
-                  <button
-                    className="text-gray-500 hover:text-black"
-                    onClick={() =>
-                      setOpenMenuId(
-                        openMenuId === comment.id ? null : comment.id
-                      )
-                    }
-                  >
-                    &#8942;
-                  </button>
                 </div>
 
                 {/* Menú desplegable */}
@@ -214,7 +240,14 @@ function PostDetail() {
                       </button>
                     )}
                     <button
-                      onClick={() => alert("Comentario reportado")}
+                      onClick={() =>
+                        Swal.fire({
+                          icon: "info",
+                          title: "Comentario reportado",
+                          text: "Gracias por tu colaboración. Revisaremos este contenido.",
+                          confirmButtonColor: "#6366F1", // Indigo
+                        })
+                      }
                       className="block w-full text-left text-sm text-gray-700 hover:bg-gray-100 px-2 py-1"
                     >
                       Denunciar

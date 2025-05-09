@@ -1,3 +1,5 @@
+import { useSearchParams } from "react-router-dom";
+
 import { useEffect, useState } from "react";
 import api from "../api";
 import { motion } from "framer-motion";
@@ -7,20 +9,26 @@ import { FaHeart, FaCommentDots, FaEye, FaHeartBroken } from "react-icons/fa";
 function PostList({ refresh }) {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page")) || 1;
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     api
-      .get("/api/posts")
+      .get(`/api/posts?page=${page}`)
       .then((response) => {
-        const postsWithLikes = response.data.map((post) => ({
+        const responseData = response.data;
+        const postsWithLikes = responseData.data.map((post) => ({
           ...post,
           liked: post.is_liked || false,
-          isHovered: false, // 👈 para el hover individual
+          isHovered: false,
         }));
+
         setPosts(postsWithLikes);
+        setTotalPages(responseData.last_page || 1);
       })
       .catch((err) => console.error("Error al obtener posts:", err));
-  }, [refresh]);
+  }, [refresh, page]);
 
   const toggleLike = async (postId) => {
     try {
@@ -140,6 +148,24 @@ function PostList({ refresh }) {
               </div>
             </motion.div>
           ))}
+        </div>
+      )}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-4">
+          <button
+            onClick={() => setSearchParams({ page: page - 1 })}
+            disabled={page === 1}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+          >
+            Anterior
+          </button>
+          <button
+            onClick={() => setSearchParams({ page: page + 1 })}
+            disabled={page === totalPages}
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded disabled:opacity-50"
+          >
+            Siguiente
+          </button>
         </div>
       )}
     </div>
