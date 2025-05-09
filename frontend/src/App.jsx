@@ -7,7 +7,6 @@ import EditProfile from "./components/EditProfile";
 import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
-import Profile from "./components/Profile";
 import PostDetail from "./components/PostDetail";
 
 import DynamicProfile from "./components/DynamicProfile";
@@ -123,17 +122,7 @@ function App() {
             }
           />
 
-          {/* Perfil propio */}
-          <Route
-            path="/profile"
-            element={
-              user ? (
-                <Profile user={user} />
-              ) : (
-                <div className="text-center mt-10">Acceso no autorizado</div>
-              )
-            }
-          />
+         
 
           {/* Home / Lista de publicaciones */}
           <Route
