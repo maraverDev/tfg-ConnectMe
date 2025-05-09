@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer"; // ajusta el path según tu estructura
@@ -44,17 +46,39 @@ function App() {
     fetchUser();
   }, []); // El arreglo vacío hace que solo se ejecute al montarse el componente
 
-  // 🔁 Polling cada 10 segundos para actualizar notificaciones
   useEffect(() => {
+    let lastCount = user?.unread_notifications || 0;
+
     const interval = setInterval(() => {
       api
         .get("/api/user", { withCredentials: true })
-        .then((res) => setUser(res.data))
+        .then((res) => {
+          const newCount = res.data.unread_notifications;
+
+          if (newCount > lastCount) {
+            // 🔔 Sonido
+            const audio = new Audio("public/follow.mp3");
+            audio
+              .play()
+              .catch((err) =>
+                console.warn("No se pudo reproducir el sonido:", err)
+              );
+
+            // 🍞 Toastify
+            toast.info("¡Nueva notificación!", {
+              icon: "🔔",
+              theme: "light",
+            });
+          }
+
+          lastCount = newCount;
+          setUser(res.data);
+        })
         .catch((err) => console.error("Error actualizando usuario:", err));
-    }, 10000); // cada 10 segundos
+    }, 10000);
 
     return () => clearInterval(interval);
-  }, []); // 👈 IMPORTANTE: sin dependencias
+  }, []);
 
   // Guardar usuario después de login o register
   const handleLogin = (userData) => {
@@ -179,6 +203,7 @@ function App() {
         </Routes>
       </div>
       <Footer />
+      <ToastContainer position="bottom-right" autoClose={3000} />
     </div>
   );
 }
