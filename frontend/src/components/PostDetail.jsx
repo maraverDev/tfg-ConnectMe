@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../api";
@@ -13,7 +15,9 @@ function PostDetail() {
   const [newComment, setNewComment] = useState("");
   const [hovered, setHovered] = useState(false);
   const [pop, setPop] = useState(false);
-  
+  const [currentUser, setCurrentUser] = useState(null);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const menuRef = useRef(null);
 
   useEffect(() => {
     api.get(`/api/posts/${id}`).then((res) => {
@@ -21,9 +25,23 @@ function PostDetail() {
       setIsLiked(res.data.is_liked || false);
     });
 
+    api
+      .get("/api/user", { withCredentials: true })
+      .then((res) => setCurrentUser(res.data))
+      .catch((err) => console.error("Error obteniendo usuario:", err));
+
     api.get(`/api/posts/${id}/comments`).then((res) => {
       setComments(res.data);
     });
+
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [id]);
 
   const toggleLike = async () => {
@@ -57,7 +75,14 @@ function PostDetail() {
       console.error("Error al comentar:", error);
     }
   };
-
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await api.delete(`/api/comments/${commentId}`);
+      setComments((prev) => prev.filter((c) => c.id !== commentId));
+    } catch (error) {
+      console.error("Error al eliminar comentario:", error);
+    }
+  };
   if (!post)
     return <p className="text-center mt-10">Cargando publicación...</p>;
 
@@ -149,11 +174,53 @@ function PostDetail() {
         ) : (
           <ul className="space-y-3">
             {comments.map((comment) => (
-              <li key={comment.id} className="bg-gray-100 p-3 rounded-md">
-                <p className="text-sm text-gray-700">{comment.content}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  por {comment.user?.name || "Anónimo"}
-                </p>
+              <li
+                key={comment.id}
+                className="bg-gray-100 p-3 rounded-md relative"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm text-gray-700">{comment.content}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      por {comment.user?.name || "Anónimo"}
+                    </p>
+                  </div>
+
+                  {/* Botón de tres puntos */}
+                  <button
+                    className="text-gray-500 hover:text-black"
+                    onClick={() =>
+                      setOpenMenuId(
+                        openMenuId === comment.id ? null : comment.id
+                      )
+                    }
+                  >
+                    &#8942;
+                  </button>
+                </div>
+
+                {/* Menú desplegable */}
+                {openMenuId === comment.id && (
+                  <div
+                    ref={menuRef}
+                    className="absolute right-3 top-10 bg-white border rounded shadow p-2 z-10 w-40"
+                  >
+                    {currentUser?.id === comment.user?.id && (
+                      <button
+                        onClick={() => handleDeleteComment(comment.id)}
+                        className="block w-full text-left text-sm hover:bg-gray-100 px-2 py-1"
+                      >
+                        Eliminar
+                      </button>
+                    )}
+                    <button
+                      onClick={() => alert("Comentario reportado")}
+                      className="block w-full text-left text-sm text-gray-700 hover:bg-gray-100 px-2 py-1"
+                    >
+                      Denunciar
+                    </button>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

@@ -46,3 +46,5 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/users/{id}/followers-count', [FollowController::class, 'followersCount']);
 Route::get('/users/{id}/following-count', [FollowController::class, 'followingCount']);
+
+Route::middleware('auth:sanctum')->delete('/comments/{id}', [CommentController::class, 'destroy']);

@@ -34,4 +34,20 @@ class CommentController extends Controller
 
               return response()->json($comment, 201);
        }
+       public function destroy($id)
+       {
+              $comment = Comment::find($id);
+
+              if (!$comment) {
+                     return response()->json(['message' => 'Comentario no encontrado.'], 404);
+              }
+
+              if ($comment->user_id !== auth()->id()) {
+                     return response()->json(['message' => 'No autorizado para eliminar este comentario.'], 403);
+              }
+
+              $comment->delete();
+
+              return response()->json(['message' => 'Comentario eliminado con éxito.'], 200);
+       }
 }
