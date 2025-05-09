@@ -1,8 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import { PlusIcon } from "@heroicons/react/24/solid"; // Asegúrate de tener instalado Heroicons
 import { BellIcon } from "@heroicons/react/24/outline";
+import { FcFullTrash } from "react-icons/fc";
+
 import { useRef, useEffect, useState } from "react";
 import api from "../api";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { es } from "date-fns/locale"; // 👈 si quieres en español
 
 const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp";
 
@@ -12,6 +16,18 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
+  const handleDeleteNotification = (id) => {
+    api
+      .delete(`/api/notifications/${id}`)
+      .then(() => {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+        // opcional: actualizar también el contador
+        if (setUser) {
+          api.get("/api/user").then((res) => setUser(res.data));
+        }
+      })
+      .catch((err) => console.error("Error eliminando notificación:", err));
+  };
 
   useEffect(() => {
     if (user && showNotifications) {
@@ -19,6 +35,7 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
         setNotifications(res.data);
       });
     }
+
     const handleClickOutside = (event) => {
       if (
         notificationRef.current &&
@@ -77,7 +94,7 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
               title="Notificaciones"
             >
               <BellIcon className="w-6 h-6" />
-              
+
               {user?.unread_notifications > 0 && (
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
                   {user.unread_notifications}
@@ -97,11 +114,39 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
                   notifications.map((n) => (
                     <div
                       key={n.id}
-                      className={`px-4 py-2 text-sm hover:bg-gray-100 border-b ${
+                      className={`flex items-start justify-between gap-3 px-4 py-3 hover:bg-gray-100 border-b ${
                         n.read ? "text-gray-500" : "text-gray-800 font-medium"
                       }`}
                     >
-                      {n.message}
+                      {/* Avatar */}
+                      <img
+                        src={
+                          n.from_user?.avatar_url ||
+                          "https://www.gravatar.com/avatar/?d=mp"
+                        }
+                        alt="avatar"
+                        className="w-9 h-9 rounded-full object-cover border"
+                      />
+
+                      {/* Mensaje + fecha */}
+                      <div className="flex-1">
+                        <p className="text-sm">{n.message}</p>
+                        <p className="text-xs text-gray-400">
+                          {formatDistanceToNow(parseISO(n.created_at), {
+                            addSuffix: true,
+                            locale: es,
+                          })}
+                        </p>
+                      </div>
+
+                      {/* Botón eliminar */}
+                      <button
+                        onClick={() => handleDeleteNotification(n.id)}
+                        className="text-gray-400 hover:text-red-500"
+                        title="Eliminar notificación"
+                      >
+                        <FcFullTrash />
+                      </button>
                     </div>
                   ))
                 ) : (
