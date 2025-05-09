@@ -7,6 +7,8 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\NotificationController;
+
 
 // 🔐 Usuario autenticado
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -46,4 +48,9 @@ Route::get('/posts/{id}/comments', [CommentController::class, 'index']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])->middleware('throttle:6,1'); // 1 comentario / 10s
     Route::delete('/comments/{id}', [CommentController::class, 'destroy'])->middleware('throttle:5,1'); // borrar protegido
+});
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });

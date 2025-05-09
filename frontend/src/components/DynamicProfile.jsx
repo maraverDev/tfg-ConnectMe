@@ -51,7 +51,9 @@ function DynamicProfile() {
     api
       .get("/api/posts")
       .then((res) => {
-        const ownPosts = res.data.filter((post) => post.user.id == id);
+        const ownPosts = res.data.data
+          .filter((post) => post.user.id == id)
+          .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // 🔥 orden por fecha
         setUserPosts(ownPosts);
       })
       .catch((err) => console.error("Error cargando posts:", err));
@@ -75,6 +77,32 @@ function DynamicProfile() {
       .post(`/api/users/${id}/follow`, {}, { withCredentials: true })
       .then((res) => setIsFollowing(res.data.followed))
       .catch((err) => console.error("Error follow:", err));
+  };
+  const handleDeletePost = async (postId) => {
+    const confirm = await Swal.fire({
+      title: "¿Eliminar publicación?",
+      text: "Esta acción no se puede deshacer.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await api.delete(`/api/posts/${postId}`);
+        setUserPosts((prev) => prev.filter((post) => post.id !== postId));
+        Swal.fire(
+          "¡Eliminado!",
+          "La publicación ha sido eliminada.",
+          "success"
+        );
+      } catch (err) {
+        Swal.fire("Error", "No se pudo eliminar la publicación.", "error");
+      }
+    }
   };
 
   const handleChange = (e) => {
@@ -280,7 +308,7 @@ function DynamicProfile() {
           {userPosts.map((post) => (
             <div
               key={post.id}
-              className="rounded overflow-hidden shadow border"
+              className="relative rounded overflow-hidden shadow border"
             >
               <img
                 src={post.image_url}
@@ -290,6 +318,16 @@ function DynamicProfile() {
               <div className="p-3">
                 <p className="text-sm text-gray-700">{post.caption}</p>
               </div>
+
+              {/* Botón eliminar (solo si es tu propio perfil) */}
+              {isOwnProfile && (
+                <button
+                  onClick={() => handleDeletePost(post.id)}
+                  className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded hover:bg-red-600"
+                >
+                  Eliminar
+                </button>
+              )}
             </div>
           ))}
         </div>

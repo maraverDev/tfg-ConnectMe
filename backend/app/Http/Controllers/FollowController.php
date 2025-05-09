@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Follow;
+use App\Models\Notification;
+
 
 class FollowController extends Controller
 {
@@ -24,6 +26,12 @@ class FollowController extends Controller
                      Follow::create([
                             'follower_id' => $user->id,
                             'followed_id' => $id,
+                     ]);
+                     Notification::create([
+                            'user_id' => $id,                 // el seguido
+                            'from_user_id' => $user->id,      // el que sigue
+                            'type' => 'follow',
+                            'message' => $user->name . ' empezó a seguirte',
                      ]);
                      return response()->json(['followed' => true]);
               }
