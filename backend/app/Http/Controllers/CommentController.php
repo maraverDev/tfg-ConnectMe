@@ -6,6 +6,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use App\Models\Notification;
+
 
 class CommentController extends Controller
 {
@@ -22,19 +24,31 @@ class CommentController extends Controller
        public function store(Request $request, $postId)
        {
               $request->validate([
-                     'content' => 'required|string|max:1000',
+                     'content' => 'required|string|max:500',
               ]);
 
-              $comment = new Comment();
-              $comment->content = $request->content;
-              $comment->user_id = auth()->id(); // 👤
-              $comment->post_id = $postId;
-              $comment->save();
+              $post = \App\Models\Post::findOrFail($postId);
 
-              $comment->load('user');
+              $comment = $post->comments()->create([
+                     'user_id' => auth()->id(),
+                     'content' => $request->content,
+              ]);
 
-              return response()->json($comment, 201);
+              // Si el autor del comentario NO es el mismo que el autor del post => notifica
+              if ($post->user_id !== auth()->id()) {
+                     \App\Models\Notification::create([
+                            'user_id' => $post->user_id,
+                            'from_user_id' => auth()->id(),
+                            'type' => 'comment',
+                            'link' => '/post/' . $post->id, // << aquí va el enlace
+
+                            'message' => auth()->user()->name . ' comentó en tu publicación',
+                     ]);
+              }
+
+              return response()->json($comment);
        }
+
        public function destroy($id)
        {
               $comment = Comment::find($id);

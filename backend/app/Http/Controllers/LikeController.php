@@ -15,8 +15,8 @@ class LikeController extends Controller
         $userId = $user->id;
 
         $existing = Like::where('post_id', $postId)
-                        ->where('user_id', $userId)
-                        ->first();
+            ->where('user_id', $userId)
+            ->first();
 
         if ($existing) {
             $existing->delete();
@@ -36,7 +36,9 @@ class LikeController extends Controller
                     'user_id' => $post->user_id,         // propietario del post
                     'from_user_id' => $userId,           // quien da like
                     'type' => 'like',
-                    'message' => $user->name . ' le dio like a tu publicación',
+                    'link' => '/post/' . $post->id,
+
+                    'message' => 'A ' . $user->name . ' le ha gustado tu publicación',
                 ]);
             }
 

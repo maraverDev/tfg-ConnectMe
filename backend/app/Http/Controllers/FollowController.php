@@ -31,6 +31,7 @@ class FollowController extends Controller
                             'user_id' => $id,                 // el seguido
                             'from_user_id' => $user->id,      // el que sigue
                             'type' => 'follow',
+                            'link' => '/profile/' . auth()->id(),
                             'message' => $user->name . ' empezó a seguirte',
                      ]);
                      return response()->json(['followed' => true]);

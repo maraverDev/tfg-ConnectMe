@@ -22,6 +22,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
     return $user;
 });
+Route::middleware('auth:sanctum')->group(function () {
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy']);
+});
 
 Route::middleware('auth:sanctum')->get('/notifications/unread-count', function () {
     return response()->json([
