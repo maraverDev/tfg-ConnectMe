@@ -7,6 +7,7 @@ import { useRef, useEffect, useState } from "react";
 import api from "../api";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { es } from "date-fns/locale"; // 👈 si quieres en español
+import { Trash } from "lucide-react";
 
 const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp";
 
@@ -110,45 +111,59 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
                 <div className="p-3 border-b font-semibold text-gray-700">
                   Notificaciones
                 </div>
+
                 {notifications.length > 0 ? (
-                  notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      className={`flex items-start justify-between gap-3 px-4 py-3 hover:bg-gray-100 border-b ${
-                        n.read ? "text-gray-500" : "text-gray-800 font-medium"
-                      }`}
-                    >
-                      {/* Avatar */}
-                      <img
-                        src={
-                          n.from_user?.avatar_url ||
-                          "https://www.gravatar.com/avatar/?d=mp"
-                        }
-                        alt="avatar"
-                        className="w-9 h-9 rounded-full object-cover border"
-                      />
-
-                      {/* Mensaje + fecha */}
-                      <div className="flex-1">
-                        <p className="text-sm">{n.message}</p>
-                        <p className="text-xs text-gray-400">
-                          {formatDistanceToNow(parseISO(n.created_at), {
-                            addSuffix: true,
-                            locale: es,
-                          })}
-                        </p>
-                      </div>
-
-                      {/* Botón eliminar */}
-                      <button
-                        onClick={() => handleDeleteNotification(n.id)}
-                        className="text-gray-400 hover:text-red-500"
-                        title="Eliminar notificación"
+                  <>
+                    {notifications.map((n) => (
+                      <div
+                        key={n.id}
+                        className={`flex items-start justify-between gap-3 px-4 py-3 hover:bg-gray-100 border-b ${
+                          n.read ? "text-gray-500" : "text-gray-800 font-medium"
+                        }`}
                       >
-                        <FcFullTrash />
-                      </button>
+                        <img
+                          src={n.from_user?.avatar_url || defaultAvatar}
+                          alt="avatar"
+                          className="w-9 h-9 rounded-full object-cover border"
+                        />
+
+                        <div
+                          className="flex-1 cursor-pointer"
+                          onClick={() => {
+                            if (n.link) navigate(n.link);
+                            setShowNotifications(false);
+                          }}
+                        >
+                          <p className="text-sm">{n.message}</p>
+                          <p className="text-xs text-gray-400">
+                            {formatDistanceToNow(parseISO(n.created_at), {
+                              addSuffix: true,
+                              locale: es,
+                            })}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() => handleDeleteNotification(n.id)}
+                          className="text-gray-400 hover:text-red-500"
+                          title="Eliminar notificación"
+                        >
+                          <FcFullTrash></FcFullTrash>
+                        </button>
+                      </div>
+                    ))}
+
+                    {/* 🔗 Enlace a todas las notificaciones */}
+                    <div
+                      onClick={() => {
+                        navigate("/notifications");
+                        setShowNotifications(false);
+                      }}
+                      className="text-center py-2 text-sm text-indigo-600 font-medium hover:underline cursor-pointer"
+                    >
+                      Ver todas las notificaciones
                     </div>
-                  ))
+                  </>
                 ) : (
                   <div className="px-4 py-4 text-sm text-gray-500 text-center">
                     No tienes notificaciones.

@@ -11,6 +11,7 @@ import AuthPanel from "./components/AuthPanel";
 import CreatePost from "./components/CreatePost";
 import PostList from "./components/PostList";
 import PostDetail from "./components/PostDetail";
+import NotificationsPage from "./components/NotificationsPage";
 
 import DynamicProfile from "./components/DynamicProfile";
 import api from "./api";
@@ -188,6 +189,8 @@ function App() {
           />
 
           {/* Perfil de otro usuario */}
+          <Route path="/notifications" element={<NotificationsPage />} />
+
           <Route path="/profile/:id" element={<DynamicProfile />} />
 
           <Route
