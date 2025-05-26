@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer"; // ajusta el path según tu estructura
+import ChatPrivate from "./components/ChatPrivate";
 
 import EditProfile from "./components/EditProfile";
 import AuthPanel from "./components/AuthPanel";
@@ -14,7 +15,7 @@ import PostDetail from "./components/PostDetail";
 import NotificationsPage from "./components/NotificationsPage";
 
 import DynamicProfile from "./components/DynamicProfile";
-import Chat from "./components/Chat";  // 💬 Nuevo: Componente de Chat
+import Chat from "./components/Chat"; // 💬 Nuevo: Componente de Chat
 import api from "./api";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
   const [showCreate, setShowCreate] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showChat, setShowChat] = useState(false); // 💬 Nuevo: Estado para el chat
+  const [privateTarget, setPrivateTarget] = useState(null);
 
   const navigate = useNavigate();
 
@@ -82,6 +84,19 @@ function App() {
 
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      const userTarget = e.detail;
+      setPrivateTarget(userTarget);
+      if (userTarget?.id) {
+        navigate(`/chat/${userTarget.id}`);
+      }
+    };
+
+    window.addEventListener("openPrivateChat", handler);
+    return () => window.removeEventListener("openPrivateChat", handler);
+  }, [navigate]);
 
   // Guardar usuario después de login o register
   const handleLogin = (userData) => {
@@ -145,7 +160,7 @@ function App() {
       )}
 
       {/* CHAT EN VIVO */}
-      {showChat && <Chat user={user} onClose={() => setShowChat(false)} />} 
+      {showChat && <Chat user={user} onClose={() => setShowChat(false)} />}
 
       {/* RUTAS */}
       <div className="p-6 pb-20">
@@ -209,6 +224,10 @@ function App() {
             }
           />
           <Route path="/post/:id" element={<PostDetail />} />
+          <Route
+            path="/chat/:id"
+            element={<ChatPrivate user={user} target={privateTarget} />}
+          />
         </Routes>
       </div>
       <Footer />

@@ -296,7 +296,18 @@ function DynamicProfile() {
           </div>
         </div>
       </div>
-
+      {!isOwnProfile && currentUser && (
+        <button
+          onClick={() =>
+            window.dispatchEvent(
+              new CustomEvent("openPrivateChat", { detail: userData })
+            )
+          }
+          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded"
+        >
+          Enviar mensaje privado
+        </button>
+      )}
       <hr className="my-6" />
 
       <h3 className="text-lg font-semibold text-gray-700 mb-4">

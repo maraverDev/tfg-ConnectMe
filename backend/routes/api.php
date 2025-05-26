@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MessageController;
+
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
@@ -84,3 +86,7 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/users', [UserController::class, 'search']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/messages/{userId}', [MessageController::class, 'index']);
+    Route::post('/messages', [MessageController::class, 'store']);
+});
