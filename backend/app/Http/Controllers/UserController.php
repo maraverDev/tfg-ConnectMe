@@ -134,4 +134,23 @@ class UserController extends Controller
         $request->session()->regenerateToken();
         return response()->json(['message' => 'Sesión cerrada']);
     }
+    public function search(Request $request)
+    {
+        $query = $request->input('search');
+
+        $users = User::where('name', 'like', "%{$query}%")
+            ->select('id', 'name', 'avatar_url')
+            ->limit(5)
+            ->get();
+
+        return response()->json($users);
+    }
+    public function updateLastSeen(Request $request)
+    {
+        $userId = auth()->id();
+
+        \DB::update("UPDATE users SET last_seen = NOW() WHERE id = ?", [$userId]);
+
+        return response()->json(['ok' => true]);
+    }
 }

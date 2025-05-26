@@ -14,6 +14,7 @@ import PostDetail from "./components/PostDetail";
 import NotificationsPage from "./components/NotificationsPage";
 
 import DynamicProfile from "./components/DynamicProfile";
+import Chat from "./components/Chat";  // 💬 Nuevo: Componente de Chat
 import api from "./api";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
   const [refresh, setRefresh] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showChat, setShowChat] = useState(false); // 💬 Nuevo: Estado para el chat
 
   const navigate = useNavigate();
 
@@ -118,6 +120,7 @@ function App() {
         user={user}
         onLogout={handleLogout}
         onShowCreatePost={() => setShowCreate(true)}
+        onToggleChat={() => setShowChat((prev) => !prev)} // 💬 Control del chat
       />
 
       {/* MODAL CREAR POST */}
@@ -140,6 +143,9 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* CHAT EN VIVO */}
+      {showChat && <Chat user={user} onClose={() => setShowChat(false)} />} 
 
       {/* RUTAS */}
       <div className="p-6 pb-20">

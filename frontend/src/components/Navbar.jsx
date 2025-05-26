@@ -1,28 +1,28 @@
 import { useNavigate } from "react-router-dom";
-import { PlusIcon } from "@heroicons/react/24/solid"; // Asegúrate de tener instalado Heroicons
-import { BellIcon } from "@heroicons/react/24/outline";
+import { PlusIcon } from "@heroicons/react/24/solid";
+import { BellIcon, ChatBubbleLeftIcon } from "@heroicons/react/24/outline";
 import { FcFullTrash } from "react-icons/fc";
 
 import { useRef, useEffect, useState } from "react";
 import api from "../api";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { es } from "date-fns/locale"; // 👈 si quieres en español
+import { es } from "date-fns/locale";
 import { Trash } from "lucide-react";
 
 const defaultAvatar = "https://www.gravatar.com/avatar/?d=mp";
 
-function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
+function Navbar({ user, onLogout, onShowCreatePost, onToggleChat, setUser }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [showNotifications, setShowNotifications] = useState(false);
   const notificationRef = useRef(null);
+
   const handleDeleteNotification = (id) => {
     api
       .delete(`/api/notifications/${id}`)
       .then(() => {
         setNotifications((prev) => prev.filter((n) => n.id !== id));
-        // opcional: actualizar también el contador
         if (setUser) {
           api.get("/api/user").then((res) => setUser(res.data));
         }
@@ -44,17 +44,8 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
       ) {
         if (showNotifications) {
           setShowNotifications(false);
-
-          // ✅ Marcar todas como leídas al cerrar
           api
             .put("/api/notifications/read-all")
-            .then(() => {
-              if (setUser) {
-                api
-                  .get("/api/user", { withCredentials: true })
-                  .then((res) => setUser(res.data));
-              }
-            })
             .catch((err) =>
               console.error("Error marcando notificaciones como leídas:", err)
             );
@@ -67,6 +58,7 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [user, showNotifications]);
+
   return (
     <nav className="bg-white shadow px-6 py-4 flex justify-between items-center">
       <h1
@@ -78,13 +70,21 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
 
       {user ? (
         <div className="flex items-center gap-4 relative">
-          {/* Botón para añadir post */}
           <button
             onClick={onShowCreatePost}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition duration-150 ease-in-out flex items-center gap-2 text-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm flex items-center gap-2 text-sm"
           >
             <PlusIcon className="w-5 h-5" />
             <span>Añadir</span>
+          </button>
+
+          {/* Botón de Chat */}
+          <button
+            onClick={onToggleChat}
+            className="relative text-gray-600 hover:text-indigo-600"
+            title="Chat en vivo"
+          >
+            <ChatBubbleLeftIcon className="w-6 h-6" />
           </button>
 
           {/* Notificaciones */}
@@ -148,12 +148,11 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
                           className="text-gray-400 hover:text-red-500"
                           title="Eliminar notificación"
                         >
-                          <FcFullTrash></FcFullTrash>
+                          <FcFullTrash />
                         </button>
                       </div>
                     ))}
 
-                    {/* 🔗 Enlace a todas las notificaciones */}
                     <div
                       onClick={() => {
                         navigate("/notifications");
@@ -173,7 +172,6 @@ function Navbar({ user, onLogout, onShowCreatePost, setUser }) {
             )}
           </div>
 
-          {/* Avatar dropdown */}
           <div className="relative">
             <img
               src={user.avatar_url || defaultAvatar}

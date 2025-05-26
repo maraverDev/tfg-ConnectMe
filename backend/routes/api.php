@@ -82,3 +82,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::put('/notifications/read-all', [NotificationController::class, 'markAllAsRead']);
 });
+
+Route::get('/users', [UserController::class, 'search']);
+Route::middleware('auth:sanctum')->post('/ping', [UserController::class, 'updateLastSeen']);
