@@ -84,4 +84,3 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/users', [UserController::class, 'search']);
-Route::middleware('auth:sanctum')->post('/ping', [UserController::class, 'updateLastSeen']);

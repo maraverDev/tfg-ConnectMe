@@ -145,12 +145,4 @@ class UserController extends Controller
 
         return response()->json($users);
     }
-    public function updateLastSeen(Request $request)
-    {
-        $userId = auth()->id();
-
-        \DB::update("UPDATE users SET last_seen = NOW() WHERE id = ?", [$userId]);
-
-        return response()->json(['ok' => true]);
-    }
 }
