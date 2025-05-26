@@ -12,50 +12,65 @@ class UserController extends Controller
 {
     public function register(Request $request)
     {
-        // Validación de los datos recibidos
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:100',
-                'email' => 'required|email|unique:users',
-                'password' => 'required|string|min:6|confirmed', // Usamos "confirmed" para la validación de contraseñas
-                'bio' => 'nullable|string',
-                'city' => 'nullable|string',
-                'avatar_url' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:1000000' // Validación para imagen
+                'name' => ['required', 'string', 'max:100'],
+                'email' => ['required', 'email', 'unique:users,email'],
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                    'regex:/[a-z]/',      // al menos una minúscula
+                    'regex:/[A-Z]/',      // al menos una mayúscula
+                    'regex:/[0-9]/',      // al menos un número
+                    'regex:/[@$!%*#?&]/'  // al menos un carácter especial
+                ],
+                'bio' => ['nullable', 'string'],
+                'city' => ['nullable', 'string', 'max:100'],
+                'avatar_url' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:1000'],
+            ], [
+                'name.required' => 'El nombre es obligatorio.',
+                'email.required' => 'El correo electrónico es obligatorio.',
+                'email.email' => 'El correo electrónico no es válido.',
+                'email.unique' => 'Este correo ya está en uso.',
+                'password.required' => 'La contraseña es obligatoria.',
+                'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+                'password.confirmed' => 'Las contraseñas no coinciden.',
+                'password.regex' => 'La contraseña debe contener una mayúscula, una minúscula, un número y un símbolo.',
+                'avatar_url.image' => 'El archivo debe ser una imagen.',
+                'avatar_url.mimes' => 'La imagen debe ser de tipo jpeg, png, jpg, gif o svg.',
             ]);
 
-            // Crear el nuevo usuario
+
             $user = new User();
             $user->name = $validated['name'];
             $user->email = $validated['email'];
-            $user->password = bcrypt($validated['password']); // Encriptamos la contraseña
+            $user->password = bcrypt($validated['password']);
             $user->bio = $validated['bio'] ?? null;
             $user->city = $validated['city'] ?? null;
 
-            // Subir la imagen de perfil
             if ($request->hasFile('avatar_url')) {
-                // Guardamos la imagen en la carpeta 'avatars' en 'public'
                 $path = $request->file('avatar_url')->store('avatars', 'public');
-                $user->avatar_url = asset('storage/' . $path); // Guardamos la URL pública de la imagen
+                $user->avatar_url = asset('storage/' . $path);
             }
 
             $user->save();
 
-            // Iniciar sesión automáticamente después del registro
             Auth::login($user);
 
             return response()->json(['user' => $user], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Si hay un error de validación, devolver los mensajes al frontend
             return response()->json([
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            // Si ocurre cualquier otro tipo de error, devolver mensaje genérico
             return response()->json([
                 'error' => 'Hubo un problema al registrar el usuario. Inténtalo de nuevo más tarde.'
             ], 500);
         }
     }
+
 
     public function login(Request $request)
     {

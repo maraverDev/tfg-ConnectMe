@@ -34,20 +34,23 @@ class CommentController extends Controller
                      'content' => $request->content,
               ]);
 
-              // Si el autor del comentario NO es el mismo que el autor del post => notifica
+              // Notificación si no comenta su propio post
               if ($post->user_id !== auth()->id()) {
                      \App\Models\Notification::create([
                             'user_id' => $post->user_id,
                             'from_user_id' => auth()->id(),
                             'type' => 'comment',
-                            'link' => '/post/' . $post->id, // << aquí va el enlace
-
+                            'link' => '/post/' . $post->id,
                             'message' => auth()->user()->name . ' comentó en tu publicación',
                      ]);
               }
 
+              // 🔥 Aquí se carga la relación
+              $comment->load('user');
+
               return response()->json($comment);
        }
+
 
        public function destroy($id)
        {
