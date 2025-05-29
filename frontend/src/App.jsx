@@ -129,7 +129,7 @@ function App() {
   if (loading) return <div className="text-center mt-10">Cargando...</div>;
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-gray-100 min-h-screen flex flex-col">
       {/* NAVBAR */}
       <Navbar
         user={user}
@@ -163,7 +163,7 @@ function App() {
       {showChat && <Chat user={user} onClose={() => setShowChat(false)} />}
 
       {/* RUTAS */}
-      <div className="p-6 pb-20">
+      <div className="flex-grow p-6">
         <Routes>
           {/* Login */}
           <Route
