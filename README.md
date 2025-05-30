@@ -48,7 +48,7 @@
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/usuario/connectme.git
+git clone https://github.com/maraverDev/tfg-ConnectMe.git
 ```
 
 ### 2. Configurar el backend (Laravel)
